@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { ChefHat, Bookmark, BookOpen, Menu, X, LogOut, User } from 'lucide-react';
+import { ChefHat, Bookmark, BookOpen, Menu, X, LogOut, User, MessageSquare } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export default function Header({ onMobileMenuToggle }) {
@@ -36,6 +36,7 @@ export default function Header({ onMobileMenuToggle }) {
   const navLinks = [
     { href: '/',         label: 'Recipe Finder', icon: ChefHat },
     { href: '/recipes',  label: 'All Recipes',   icon: BookOpen },
+    { href: '/chat',     label: 'Chef AI',        icon: MessageSquare },
     { href: '/saved',    label: 'Saved',          icon: Bookmark },
   ];
 
