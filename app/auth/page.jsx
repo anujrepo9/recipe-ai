@@ -96,6 +96,23 @@ export default function AuthPage() {
           <p style={{ color: '#8B9AAB', fontSize: '0.875rem', margin: 0 }}>
             {mode === 'login' ? 'Welcome back' : 'Create your account'}
           </p>
+          <a
+            href="/"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              marginTop: '0.75rem',
+              color: '#8B9AAB',
+              fontSize: '0.8rem',
+              textDecoration: 'none',
+              transition: 'color 0.2s',
+            }}
+            onMouseEnter={e => e.target.style.color = '#00C8D4'}
+            onMouseLeave={e => e.target.style.color = '#8B9AAB'}
+          >
+            &larr; Back to Recipe Finder
+          </a>
         </div>
 
         {/* Mode toggle */}
