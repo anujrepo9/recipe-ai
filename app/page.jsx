@@ -117,18 +117,34 @@ export default function HomePage() {
         {/* Mobile Sidebar Overlay */}
         {sidebarOpen && (
           <>
-            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 49 }} onClick={() => setSidebarOpen(false)} />
-            <aside className="sidebar open" style={{ zIndex: 50 }}>
-              <div style={{ position: 'absolute', top: 16, right: 16 }}>
-                <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', padding: 4 }}>
-                  <X size={22} />
+            {/* Backdrop */}
+            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 49, backdropFilter: 'blur(3px)' }} onClick={() => setSidebarOpen(false)} />
+            {/* Drawer — plain div, NOT aside (Sidebar renders its own aside) */}
+            <div style={{
+              position: 'fixed', top: 0, left: 0, bottom: 0,
+              width: 'min(85vw, 300px)',
+              background: 'var(--surface)',
+              borderRight: '1px solid var(--border-strong)',
+              zIndex: 50, overflowY: 'auto',
+              animation: 'slideInLeft 0.25s ease',
+              display: 'flex', flexDirection: 'column',
+            }}>
+              {/* Drawer header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1rem 0.75rem', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+                <span style={{ fontFamily: 'Syne', fontWeight: 700, fontSize: '0.8rem', color: 'var(--muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Filters</span>
+                <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', padding: 4, display: 'flex' }}>
+                  <X size={20} />
                 </button>
               </div>
-              <Sidebar ingredients={ingredients} cuisines={cuisines} locations={locations}
-                selectedIngredients={selectedIngredients} selectedCuisine={selectedCuisine}
-                selectedLocation={selectedLocation} onIngredientToggle={toggleIngredient}
-                onCuisineSelect={setSelectedCuisine} onLocationSelect={setSelectedLocation} />
-            </aside>
+              {/* Sidebar content directly — no wrapper aside */}
+              <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
+                <Sidebar ingredients={ingredients} cuisines={cuisines} locations={locations}
+                  selectedIngredients={selectedIngredients} selectedCuisine={selectedCuisine}
+                  selectedLocation={selectedLocation} onIngredientToggle={toggleIngredient}
+                  onCuisineSelect={setSelectedCuisine} onLocationSelect={setSelectedLocation}
+                  inDrawer={true} />
+              </div>
+            </div>
           </>
         )}
 

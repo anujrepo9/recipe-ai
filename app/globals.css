@@ -430,3 +430,8 @@ body, header, aside, main, div, span, p, h1, h2, h3, h4, button, input, textarea
   -webkit-overflow-scrolling: touch;
 }
 .chip-scroll::-webkit-scrollbar { display: none; }
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
