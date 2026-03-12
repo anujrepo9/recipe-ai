@@ -1,4 +1,5 @@
 import './globals.css';
+import { ThemeProvider } from '../lib/ThemeProvider';
 
 export const metadata = {
   title: 'Recipe Finder — Discover Your Next Meal',
@@ -8,7 +9,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="font-body antialiased">{children}</body>
+      <body className="font-body antialiased">
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

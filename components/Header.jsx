@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { ChefHat, Bookmark, BookOpen, Menu, X, LogOut, User, MessageSquare } from 'lucide-react';
+import { ChefHat, Bookmark, BookOpen, Menu, X, LogOut, User, MessageSquare, Sun, Moon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useTheme } from '../lib/ThemeProvider';
 
 export default function Header({ onMobileMenuToggle }) {
   const [user, setUser]       = useState(null);
@@ -12,6 +13,8 @@ export default function Header({ onMobileMenuToggle }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const pathname = usePathname();
   const router   = useRouter();
+  const { theme, toggleTheme } = useTheme();
+  const isLight = theme === 'light';
 
   useEffect(() => {
     // Get initial session
@@ -43,9 +46,9 @@ export default function Header({ onMobileMenuToggle }) {
   return (
     <header
       style={{
-        background: 'rgba(8, 11, 15, 0.85)',
+        background: 'var(--header-bg)',
         backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(0,200,212,0.1)',
+        borderBottom: '1px solid var(--border)',
         position: 'sticky',
         top: 0,
         zIndex: 40,
@@ -110,8 +113,8 @@ export default function Header({ onMobileMenuToggle }) {
                   fontFamily: 'DM Sans, sans-serif',
                   fontWeight: active ? 600 : 500,
                   fontSize: '0.9rem',
-                  color: active ? '#00C8D4' : '#8B9AAB',
-                  background: active ? 'rgba(0,200,212,0.1)' : 'transparent',
+                  color: active ? 'var(--accent)' : 'var(--muted)',
+                  background: active ? 'var(--accent-dim)' : 'transparent',
                   transition: 'all 0.2s',
                 }}
               >
@@ -124,6 +127,23 @@ export default function Header({ onMobileMenuToggle }) {
 
         {/* Right side */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            title={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: 36, height: 36, borderRadius: '9px',
+              background: isLight ? 'rgba(232,98,10,0.1)' : 'rgba(0,200,212,0.08)',
+              border: `1px solid ${isLight ? 'rgba(232,98,10,0.25)' : 'rgba(0,200,212,0.2)'}`,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              color: isLight ? '#E8620A' : '#00C8D4',
+            }}
+          >
+            {isLight ? <Moon size={16} /> : <Sun size={16} />}
+          </button>
+
           {user ? (
             <div style={{ position: 'relative' }}>
               <button
