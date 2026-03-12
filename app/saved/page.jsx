@@ -62,14 +62,14 @@ export default function SavedPage() {
       <main style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1.5rem' }}>
         {/* Header */}
         <div style={{ marginBottom: '2rem' }}>
-          <h1 style={{ fontFamily: 'Playfair Display, serif', fontStyle: 'italic', fontSize: 'clamp(1.8rem, 4vw, 2.2rem)', fontWeight: 700, color: '#F0F4F8', margin: '0 0 0.5rem' }}>
+          <h1 style={{ fontFamily: 'Playfair Display, serif', fontStyle: 'italic', fontSize: 'clamp(1.8rem, 4vw, 2.2rem)', fontWeight: 700, color: 'var(--text)', margin: '0 0 0.5rem' }}>
             Your Profile
           </h1>
-          <p style={{ color: '#8B9AAB', margin: 0, fontSize: '0.9rem' }}>{user?.email}</p>
+          <p style={{ color: 'var(--muted)', margin: 0, fontSize: '0.9rem' }}>{user?.email}</p>
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid rgba(0,200,212,0.1)', paddingBottom: '0' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--accent-dim)', paddingBottom: '0' }}>
           {[
             { id: 'saved',   label: `Saved (${savedRecipes.length})`,       icon: Bookmark },
             { id: 'history', label: `Search History (${searchHistory.length})`, icon: History },
@@ -82,8 +82,8 @@ export default function SavedPage() {
                 padding: '10px 16px',
                 background: 'none',
                 border: 'none',
-                borderBottom: `2px solid ${tab === id ? '#00C8D4' : 'transparent'}`,
-                color: tab === id ? '#00C8D4' : '#8B9AAB',
+                borderBottom: `2px solid ${tab === id ? 'var(--accent)' : 'transparent'}`,
+                color: tab === id ? 'var(--accent)' : 'var(--muted)',
                 fontFamily: 'Syne, sans-serif',
                 fontWeight: 600, fontSize: '0.875rem',
                 cursor: 'pointer',
@@ -99,10 +99,10 @@ export default function SavedPage() {
         {/* Saved Recipes Tab */}
         {tab === 'saved' && (
           savedRecipes.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '4rem 2rem', background: '#111518', borderRadius: '20px', border: '1px dashed rgba(0,200,212,0.15)' }}>
+            <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--card-bg)', borderRadius: '20px', border: '1px dashed var(--accent-dim)' }}>
               <Bookmark size={48} style={{ opacity: 0.2, margin: '0 auto 1rem', display: 'block' }} color="#00C8D4" />
-              <h3 style={{ fontFamily: 'Syne', color: '#F0F4F8', margin: '0 0 0.5rem' }}>No saved recipes yet</h3>
-              <p style={{ color: '#8B9AAB', margin: '0 0 1.5rem', fontSize: '0.9rem' }}>
+              <h3 style={{ fontFamily: 'Syne', color: 'var(--text)', margin: '0 0 0.5rem' }}>No saved recipes yet</h3>
+              <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', fontSize: '0.9rem' }}>
                 Save recipes from the finder or browse page.
               </p>
               <a href="/" className="btn-primary" style={{ textDecoration: 'none', display: 'inline-flex' }}>
@@ -127,14 +127,14 @@ export default function SavedPage() {
         {/* Search History Tab */}
         {tab === 'history' && (
           searchHistory.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '4rem 2rem', background: '#111518', borderRadius: '20px', border: '1px dashed rgba(0,200,212,0.15)' }}>
+            <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--card-bg)', borderRadius: '20px', border: '1px dashed var(--accent-dim)' }}>
               <History size={48} style={{ opacity: 0.2, margin: '0 auto 1rem', display: 'block' }} color="#00C8D4" />
-              <p style={{ color: '#8B9AAB', margin: 0 }}>No search history yet.</p>
+              <p style={{ color: 'var(--muted)', margin: 0 }}>No search history yet.</p>
             </div>
           ) : (
             <>
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
-                <button onClick={clearHistory} className="btn-ghost" style={{ color: '#FF6B6B', borderColor: 'rgba(255,107,107,0.2)' }}>
+                <button onClick={clearHistory} className="btn-ghost" style={{ color: 'var(--danger)', borderColor: 'rgba(255,107,107,0.2)' }}>
                   <Trash2 size={14} /> Clear history
                 </button>
               </div>
@@ -152,11 +152,11 @@ export default function SavedPage() {
                           {h.cuisine && <span className="badge badge-amber" style={{ fontSize: '0.72rem' }}>{h.cuisine}</span>}
                           {h.location && <span className="badge badge-muted" style={{ fontSize: '0.72rem' }}>{h.location}</span>}
                         </div>
-                        <p style={{ margin: 0, color: '#8B9AAB', fontSize: '0.8rem' }}>
+                        <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.8rem' }}>
                           {h.results_count} recipe{h.results_count !== 1 ? 's' : ''} found
                         </p>
                       </div>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#8B9AAB', fontSize: '0.75rem', flexShrink: 0 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--muted)', fontSize: '0.75rem', flexShrink: 0 }}>
                         <Clock size={12} />
                         {new Date(h.searched_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </span>

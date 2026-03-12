@@ -111,14 +111,14 @@ export default function RecipesPage() {
               fontStyle: 'italic',
               fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
               fontWeight: 700,
-              color: '#F0F4F8',
+              color: 'var(--text)',
               margin: '0 0 0.5rem',
             }}
           >
             All Recipes
           </h1>
           {!loading && (
-            <p style={{ color: '#8B9AAB', margin: 0, fontSize: '0.9rem' }}>
+            <p style={{ color: 'var(--muted)', margin: 0, fontSize: '0.9rem' }}>
               {filtered.length} recipes found
             </p>
           )}
@@ -133,7 +133,7 @@ export default function RecipesPage() {
         >
           {/* Search */}
           <div style={{ position: 'relative', flex: '1', minWidth: '200px', maxWidth: '340px' }}>
-            <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#8B9AAB' }} />
+            <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
             <input
               className="input"
               style={{ paddingLeft: '36px' }}
@@ -142,7 +142,7 @@ export default function RecipesPage() {
               onChange={(e) => { setSearch(e.target.value); setPage(0); }}
             />
             {search && (
-              <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#8B9AAB', cursor: 'pointer', padding: 2 }}>
+              <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', padding: 2 }}>
                 <X size={14} />
               </button>
             )}
@@ -195,7 +195,7 @@ export default function RecipesPage() {
         {loading ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1rem' }}>
             {[...Array(6)].map((_, i) => (
-              <div key={i} style={{ background: '#111518', borderRadius: '20px', padding: '1.5rem', border: '1px solid rgba(0,200,212,0.08)' }}>
+              <div key={i} style={{ background: 'var(--card-bg)', borderRadius: '20px', padding: '1.5rem', border: '1px solid var(--accent-dim)' }}>
                 <div className="skeleton" style={{ height: 20, width: '70%', marginBottom: 12 }} />
                 <div className="skeleton" style={{ height: 14, width: '50%', marginBottom: 16 }} />
                 <div className="skeleton" style={{ height: 14, width: '90%' }} />
@@ -203,7 +203,7 @@ export default function RecipesPage() {
             ))}
           </div>
         ) : paginated.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '4rem 2rem', color: '#8B9AAB' }}>
+          <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'var(--muted)' }}>
             <BookOpen size={48} style={{ opacity: 0.2, margin: '0 auto 1rem', display: 'block' }} />
             <p style={{ margin: 0 }}>No recipes match your filters.</p>
           </div>
