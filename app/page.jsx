@@ -11,18 +11,13 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 function SkeletonCard() {
   return (
-    <div style={{
-      background: 'var(--card-bg)', border: '1px solid var(--border)',
-      borderRadius: '20px', padding: '1.5rem', marginBottom: '1rem',
-    }}>
-      <div className="skeleton" style={{ height: 20, width: '60%', marginBottom: 12 }} />
-      <div className="skeleton" style={{ height: 16, width: '40%', marginBottom: 16 }} />
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-        {[80, 60, 70].map((w, i) => (
-          <div key={i} className="skeleton" style={{ height: 24, width: w, borderRadius: 999 }} />
-        ))}
+    <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.25rem', marginBottom: '1rem' }}>
+      <div className="skeleton" style={{ height: 18, width: '60%', marginBottom: 10 }} />
+      <div className="skeleton" style={{ height: 14, width: '40%', marginBottom: 14 }} />
+      <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+        {[80, 60, 70].map((w, i) => <div key={i} className="skeleton" style={{ height: 22, width: w, borderRadius: 999 }} />)}
       </div>
-      <div className="skeleton" style={{ height: 14, width: '90%' }} />
+      <div className="skeleton" style={{ height: 12, width: '90%' }} />
     </div>
   );
 }
@@ -36,7 +31,6 @@ export default function HomePage() {
   const [results,       setResults]       = useState(null);
   const [error,         setError]         = useState(null);
   const [sidebarOpen,   setSidebarOpen]   = useState(false);
-
   const [selectedIngredients, setSelectedIngredients] = useState([]);
   const [selectedCuisine,     setSelectedCuisine]     = useState(null);
   const [selectedLocation,    setSelectedLocation]    = useState(null);
@@ -50,17 +44,13 @@ export default function HomePage() {
           fetch(`${API_BASE}/api/cuisines`),
           fetch(`${API_BASE}/api/locations`),
         ]);
-        const [ingData, cuiData, locData] = await Promise.all([
-          ingRes.json(), cuiRes.json(), locRes.json(),
-        ]);
+        const [ingData, cuiData, locData] = await Promise.all([ingRes.json(), cuiRes.json(), locRes.json()]);
         setIngredients(ingData.ingredients || []);
         setCuisines(cuiData.cuisines || []);
         setLocations(locData.locations || []);
       } catch (e) {
         setError('Could not connect to the API. Make sure the server is running.');
-      } finally {
-        setLoading(false);
-      }
+      } finally { setLoading(false); }
     }
     fetchData();
   }, []);
@@ -70,24 +60,20 @@ export default function HomePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       const { data } = await supabase.from('saved_recipes').select('recipe_name').eq('user_id', user.id);
-      if (data) setSavedNames(new Set(data.map((r) => r.recipe_name)));
+      if (data) setSavedNames(new Set(data.map(r => r.recipe_name)));
     }
     loadSaved();
   }, []);
 
   function toggleIngredient(ing) {
-    setSelectedIngredients((prev) =>
-      prev.includes(ing) ? prev.filter((i) => i !== ing) : [...prev, ing]
-    );
+    setSelectedIngredients(prev => prev.includes(ing) ? prev.filter(i => i !== ing) : [...prev, ing]);
   }
 
   async function handlePredict() {
     if (!selectedIngredients.length) { setError('Please select at least 1 ingredient.'); return; }
     if (!selectedCuisine)            { setError('Please select a cuisine type.'); return; }
     if (!selectedLocation)           { setError('Please select a location.'); return; }
-
     setError(null); setPredicting(true); setResults(null);
-
     try {
       const res = await fetch(`${API_BASE}/api/predict`, {
         method: 'POST',
@@ -97,116 +83,96 @@ export default function HomePage() {
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Prediction failed');
       setResults(data.recommendations);
-
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        supabase.from('search_history').insert({
-          user_id: user.id, ingredients: selectedIngredients,
-          cuisine: selectedCuisine, location: selectedLocation,
-          results_count: data.recommendations.length,
-        }).then(() => {});
+        supabase.from('search_history').insert({ user_id: user.id, ingredients: selectedIngredients, cuisine: selectedCuisine, location: selectedLocation, results_count: data.recommendations.length }).then(() => {});
       }
-    } catch (e) {
-      setError(e.message || 'Something went wrong. Please try again.');
-    } finally {
-      setPredicting(false);
-    }
+    } catch (e) { setError(e.message || 'Something went wrong. Please try again.'); }
+    finally { setPredicting(false); }
   }
+
+  const filterCount = selectedIngredients.length + (selectedCuisine ? 1 : 0) + (selectedLocation ? 1 : 0);
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <Header />
-
       <div style={{ display: 'flex', position: 'relative' }}>
+
         {/* Desktop Sidebar */}
         <div className="hidden md:block">
           {loading ? (
             <aside className="sidebar">
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {[120, 80, 100, 60, 90].map((w, i) => (
-                  <div key={i} className="skeleton" style={{ height: 30, width: w, borderRadius: 999 }} />
-                ))}
+                {[120,80,100,60,90].map((w,i) => <div key={i} className="skeleton" style={{ height: 28, width: w, borderRadius: 999 }} />)}
               </div>
             </aside>
           ) : (
-            <Sidebar
-              ingredients={ingredients} cuisines={cuisines} locations={locations}
+            <Sidebar ingredients={ingredients} cuisines={cuisines} locations={locations}
               selectedIngredients={selectedIngredients} selectedCuisine={selectedCuisine}
               selectedLocation={selectedLocation} onIngredientToggle={toggleIngredient}
-              onCuisineSelect={setSelectedCuisine} onLocationSelect={setSelectedLocation}
-            />
+              onCuisineSelect={setSelectedCuisine} onLocationSelect={setSelectedLocation} />
           )}
         </div>
 
         {/* Mobile Sidebar Overlay */}
         {sidebarOpen && (
           <>
-            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 49 }} onClick={() => setSidebarOpen(false)} />
+            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 49 }} onClick={() => setSidebarOpen(false)} />
             <aside className="sidebar open" style={{ zIndex: 50 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <span style={{ fontFamily: 'Syne', fontWeight: 700, color: 'var(--text)' }}>Filters</span>
-                <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}>
-                  <X size={20} />
+              <div style={{ position: 'absolute', top: 16, right: 16 }}>
+                <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', padding: 4 }}>
+                  <X size={22} />
                 </button>
               </div>
-              <Sidebar
-                ingredients={ingredients} cuisines={cuisines} locations={locations}
+              <Sidebar ingredients={ingredients} cuisines={cuisines} locations={locations}
                 selectedIngredients={selectedIngredients} selectedCuisine={selectedCuisine}
                 selectedLocation={selectedLocation} onIngredientToggle={toggleIngredient}
-                onCuisineSelect={setSelectedCuisine} onLocationSelect={setSelectedLocation}
-              />
+                onCuisineSelect={setSelectedCuisine} onLocationSelect={setSelectedLocation} />
             </aside>
           </>
         )}
 
         {/* Main Content */}
-        <main style={{ flex: 1, minWidth: 0, maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+        <main className="page-main" style={{ flex: 1, minWidth: 0, maxWidth: '900px', margin: '0 auto', padding: '1.5rem 1rem' }}>
 
           {/* Hero */}
-          <div style={{
-            borderRadius: '20px', overflow: 'hidden', marginBottom: '2rem',
-            position: 'relative', background: 'var(--hero-overlay, var(--accent-dim))',
-            border: '1px solid var(--border)', padding: '2.5rem 2rem',
-          }}>
+          <div className="hero-section" style={{ borderRadius: '16px', overflow: 'hidden', marginBottom: '1.5rem', position: 'relative', background: 'var(--accent-dim)', border: '1px solid var(--border)', padding: '2rem 1.5rem' }}>
             <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/kitchen.png)', backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.07 }} />
             <div style={{ position: 'relative', zIndex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '0.75rem' }}>
-                <ChefHat size={18} color="var(--accent)" />
-                <span style={{ fontFamily: 'Syne', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--accent)', textTransform: 'uppercase' }}>
-                  AI-Powered
-                </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '0.6rem' }}>
+                <ChefHat size={16} color="var(--accent)" />
+                <span style={{ fontFamily: 'Syne', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--accent)', textTransform: 'uppercase' }}>AI-Powered</span>
               </div>
-              <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: 'clamp(1.6rem, 4vw, 2.4rem)', fontWeight: 700, color: 'var(--text)', margin: '0 0 0.5rem', lineHeight: 1.2 }}>
+              <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: 'clamp(1.4rem, 5vw, 2.2rem)', fontWeight: 700, color: 'var(--text)', margin: '0 0 0.5rem', lineHeight: 1.2 }}>
                 Find Recipes with<br />
-                <em style={{ color: 'var(--accent)', fontStyle: 'italic' }}>What You Already Have.</em>
+                <em style={{ color: 'var(--accent)' }}>What You Already Have.</em>
               </h1>
-              <p style={{ margin: '0 0 1.5rem', color: 'var(--muted)', fontSize: '0.95rem', maxWidth: '480px' }}>
-                Select your ingredients, cuisine, and location — our ML model predicts popularity and finds your perfect match.
+              <p style={{ margin: '0 0 1.25rem', color: 'var(--muted)', fontSize: 'clamp(0.82rem, 2.5vw, 0.95rem)', maxWidth: '480px' }}>
+                Select ingredients, cuisine, and location — our ML model predicts popularity and finds your perfect match.
               </p>
 
-              {(selectedIngredients.length > 0 || selectedCuisine || selectedLocation) && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '1rem' }}>
-                  {selectedIngredients.slice(0, 5).map((ing) => (
-                    <span key={ing} className="badge badge-teal">{ing.charAt(0).toUpperCase() + ing.slice(1)}</span>
-                  ))}
-                  {selectedIngredients.length > 5 && <span className="badge badge-muted">+{selectedIngredients.length - 5} more</span>}
+              {filterCount > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '1rem' }}>
+                  {selectedIngredients.slice(0, 4).map(ing => <span key={ing} className="badge badge-teal">{ing.charAt(0).toUpperCase()+ing.slice(1)}</span>)}
+                  {selectedIngredients.length > 4 && <span className="badge badge-muted">+{selectedIngredients.length-4} more</span>}
                   {selectedCuisine  && <span className="badge badge-amber">{selectedCuisine}</span>}
                   {selectedLocation && <span className="badge badge-muted">{selectedLocation}</span>}
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                <button className="btn-primary" onClick={handlePredict} disabled={predicting || loading} style={{ minWidth: 200 }}>
-                  {predicting
-                    ? <><Loader2 size={16} className="animate-spin-slow" /> Finding recipes...</>
-                    : <><Sparkles size={16} /> Get Recommendations</>
-                  }
+              {/* CTA row */}
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                <button className="btn-primary" id="predict-btn" onClick={handlePredict} disabled={predicting || loading}>
+                  {predicting ? <><Loader2 size={15} className="animate-spin-slow" /> Finding recipes...</> : <><Sparkles size={15} /> Get Recommendations</>}
                 </button>
-                <button className="btn-ghost md:hidden" onClick={() => setSidebarOpen(true)} style={{ display: 'flex' }}>
-                  <SlidersHorizontal size={16} /> Filters
-                  {(selectedIngredients.length + (selectedCuisine ? 1 : 0) + (selectedLocation ? 1 : 0)) > 0 && (
-                    <span style={{ background: 'var(--accent)', color: 'var(--accent-btn-text)', borderRadius: '999px', padding: '1px 6px', fontSize: '0.7rem', fontWeight: 700 }}>
-                      {selectedIngredients.length + (selectedCuisine ? 1 : 0) + (selectedLocation ? 1 : 0)}
+                {/* Mobile filter button — always visible on mobile */}
+                <button className="btn-ghost" onClick={() => setSidebarOpen(true)}
+                  style={{ display: 'flex', flex: '0 0 auto' }}
+                  id="mobile-filter-btn">
+                  <SlidersHorizontal size={15} /> Filters
+                  {filterCount > 0 && (
+                    <span style={{ background: 'var(--accent)', color: 'var(--accent-btn-text)', borderRadius: '999px', padding: '1px 7px', fontSize: '0.7rem', fontWeight: 700 }}>
+                      {filterCount}
                     </span>
                   )}
                 </button>
@@ -214,17 +180,25 @@ export default function HomePage() {
             </div>
           </div>
 
+          <style>{`
+            #mobile-filter-btn { display: none; }
+            @media (max-width: 768px) {
+              #mobile-filter-btn { display: inline-flex !important; }
+              #predict-btn { width: 100%; justify-content: center; }
+            }
+          `}</style>
+
           {/* Error */}
           {error && (
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: '12px', padding: '1rem 1.25rem', marginBottom: '1.5rem', color: 'var(--danger)', fontSize: '0.9rem' }}>
-              <AlertCircle size={18} style={{ flexShrink: 0, marginTop: 1 }} /> {error}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: '12px', padding: '0.875rem 1rem', marginBottom: '1.25rem', color: 'var(--danger)', fontSize: '0.875rem' }}>
+              <AlertCircle size={16} style={{ flexShrink: 0, marginTop: 2 }} /> {error}
             </div>
           )}
 
-          {/* Loading skeletons */}
+          {/* Loading */}
           {predicting && (
             <div>
-              <p style={{ color: 'var(--muted)', fontSize: '0.875rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <p style={{ color: 'var(--muted)', fontSize: '0.85rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Loader2 size={14} className="animate-spin-slow" /> Running ML model...
               </p>
               {[...Array(3)].map((_, i) => <SkeletonCard key={i} />)}
@@ -234,28 +208,24 @@ export default function HomePage() {
           {/* Results */}
           {results && !predicting && (
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-                <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1.1rem', color: 'var(--text)', margin: 0 }}>
-                  Recommendations
-                  <span style={{ marginLeft: 10, fontFamily: 'DM Sans', fontWeight: 400, fontSize: '0.875rem', color: 'var(--accent)' }}>
-                    {results.length} recipes found
-                  </span>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
+                <h2 style={{ fontFamily: 'Syne', fontWeight: 700, fontSize: '1rem', color: 'var(--text)', margin: 0 }}>
+                  Recommendations <span style={{ fontFamily: 'DM Sans', fontWeight: 400, fontSize: '0.875rem', color: 'var(--accent)' }}>{results.length} found</span>
                 </h2>
               </div>
               {results.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--muted)' }}>
-                  <ChefHat size={48} style={{ opacity: 0.3, margin: '0 auto 1rem', display: 'block' }} />
-                  <p>No recipes found. Try different ingredients or cuisine.</p>
+                <div style={{ textAlign: 'center', padding: '2.5rem 1rem', color: 'var(--muted)' }}>
+                  <ChefHat size={40} style={{ opacity: 0.3, margin: '0 auto 0.75rem', display: 'block' }} />
+                  <p style={{ margin: 0 }}>No recipes found. Try different ingredients or cuisine.</p>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                   {results.map((recipe, i) => (
-                    <RecipeCard key={recipe.recipe_name + i} recipe={recipe} index={i}
+                    <RecipeCard key={recipe.recipe_name+i} recipe={recipe} index={i}
                       isSaved={savedNames.has(recipe.recipe_name)}
                       onSaveToggle={(name, isSaved) => {
                         setSavedNames(prev => { const next = new Set(prev); isSaved ? next.add(name) : next.delete(name); return next; });
-                      }}
-                    />
+                      }} />
                   ))}
                 </div>
               )}
@@ -264,15 +234,13 @@ export default function HomePage() {
 
           {/* Empty state */}
           {!results && !predicting && !error && (
-            <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--card-bg)', borderRadius: '20px', border: '1px dashed var(--border)' }}>
-              <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--accent-dim)', border: '1px solid var(--border-strong)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem' }}>
-                <Sparkles size={32} color="var(--accent)" strokeWidth={1.5} />
+            <div style={{ textAlign: 'center', padding: '3rem 1.5rem', background: 'var(--card-bg)', borderRadius: '16px', border: '1px dashed var(--border)' }}>
+              <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--accent-dim)', border: '1px solid var(--border-strong)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
+                <Sparkles size={28} color="var(--accent)" strokeWidth={1.5} />
               </div>
-              <h3 style={{ fontFamily: 'Syne', fontWeight: 700, color: 'var(--text)', margin: '0 0 0.5rem' }}>
-                Ready to find recipes
-              </h3>
-              <p style={{ color: 'var(--muted)', fontSize: '0.9rem', margin: 0 }}>
-                Pick your ingredients from the sidebar, then hit Get Recommendations.
+              <h3 style={{ fontFamily: 'Syne', fontWeight: 700, color: 'var(--text)', margin: '0 0 0.4rem', fontSize: '1rem' }}>Ready to find recipes</h3>
+              <p style={{ color: 'var(--muted)', fontSize: '0.875rem', margin: 0 }}>
+                Pick ingredients from the sidebar, then hit Get Recommendations.
               </p>
             </div>
           )}
