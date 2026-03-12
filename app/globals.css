@@ -332,3 +332,101 @@ body, header, aside, main, div, span, p, h1, h2, h3, h4, button, input, textarea
   }
   .sidebar.open { display: block; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE FIRST
+═══════════════════════════════════════════════════════════ */
+
+/* ── Tablet ──────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .sidebar { width: 240px; min-width: 240px; }
+}
+
+/* ── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* Sidebar hidden by default, shown as drawer */
+  .sidebar {
+    display: none;
+    position: fixed;
+    z-index: 50;
+    top: 0; left: 0;
+    height: 100vh;
+    width: 85vw;
+    max-width: 320px;
+    border-right: 1px solid var(--border-strong);
+    padding-top: 4rem;
+  }
+  .sidebar.open { display: block; }
+
+  /* Recipe card grid → single column */
+  .recipe-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Chip wrapping on mobile */
+  .chip { font-size: 0.78rem; padding: 5px 10px; }
+
+  /* Buttons full width on mobile */
+  .btn-primary-full { width: 100%; justify-content: center; }
+
+  /* Hero section padding */
+  .hero-section { padding: 1.5rem 1.25rem !important; }
+
+  /* Page padding */
+  .page-main { padding: 1.25rem 1rem !important; }
+
+  /* Recipe card padding */
+  .recipe-card { padding: 1.25rem 1rem; border-radius: 16px; }
+
+  /* Chat mode grid — 2 columns on mobile */
+  .mode-grid { grid-template-columns: 1fr 1fr !important; }
+
+  /* Filters row — stack vertically */
+  .filters-row { flex-direction: column !important; }
+  .filters-row > * { width: 100% !important; max-width: 100% !important; min-width: unset !important; }
+
+  /* Auth card full width */
+  .auth-card { border-radius: 0 !important; min-height: 100vh; border-left: none !important; border-right: none !important; }
+
+  /* Stat row in recipe card */
+  .stat-row { gap: 1rem !important; }
+
+  /* Suggestion chips — horizontal scroll */
+  .suggestion-chips { flex-wrap: nowrap !important; overflow-x: auto; padding-bottom: 4px; }
+  .suggestion-chips::-webkit-scrollbar { display: none; }
+  .suggestion-chips button { flex-shrink: 0; }
+}
+
+/* ── Small phones ────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .mode-grid { grid-template-columns: 1fr !important; }
+  .recipe-stats-row { flex-wrap: wrap; gap: 0.5rem !important; }
+  h1 { font-size: 1.5rem !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE TOUCH IMPROVEMENTS
+═══════════════════════════════════════════════════════════ */
+
+/* Larger tap targets on mobile */
+@media (max-width: 768px) {
+  .chip      { min-height: 36px; padding: 7px 13px; }
+  .btn-ghost { min-height: 40px; }
+  input, select, textarea { font-size: 16px !important; } /* prevents iOS zoom */
+}
+
+/* Sidebar height for 60px header */
+.sidebar { height: calc(100vh - 60px); top: 60px; }
+
+/* Horizontal scroll snap for chip rows */
+.chip-scroll {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 6px;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.chip-scroll::-webkit-scrollbar { display: none; }
