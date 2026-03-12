@@ -102,7 +102,7 @@ export default function RecipesPage() {
         {/* Page Header */}
         <div style={{ marginBottom: '2rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.5rem' }}>
-            <BookOpen size={20} color="#00C8D4" />
+            <BookOpen size={20} color="var(--accent)" />
             <span className="section-label" style={{ margin: 0 }}>Browse</span>
           </div>
           <h1

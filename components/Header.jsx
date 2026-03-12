@@ -73,7 +73,7 @@ export default function Header({ onMobileMenuToggle }) {
               width: 36,
               height: 36,
               borderRadius: '10px',
-              background: 'linear-gradient(135deg, #00C8D4, #00E5C3)',
+              background: 'linear-gradient(135deg, var(--accent), var(--accent-hover))',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -87,11 +87,11 @@ export default function Header({ onMobileMenuToggle }) {
               fontFamily: 'Syne, sans-serif',
               fontWeight: 800,
               fontSize: '1.15rem',
-              color: '#F0F4F8',
+              color: 'var(--text)',
               letterSpacing: '-0.01em',
             }}
           >
-            Recipe<span style={{ color: '#00C8D4' }}>AI</span>
+            Recipe<span style={{ color: 'var(--accent)' }}>AI</span>
           </span>
         </Link>
 
@@ -187,7 +187,7 @@ export default function Header({ onMobileMenuToggle }) {
                 >
                   <div style={{ padding: '8px 12px', borderBottom: '1px solid rgba(0,200,212,0.1)', marginBottom: '4px' }}>
                     <p style={{ margin: 0, fontSize: '0.75rem', color: '#8B9AAB' }}>Signed in as</p>
-                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#F0F4F8', fontWeight: 500 }}>{user.email}</p>
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text)', fontWeight: 500 }}>{user.email}</p>
                   </div>
                   <Link
                     href="/saved"
