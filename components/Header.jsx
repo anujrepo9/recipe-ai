@@ -22,10 +22,7 @@ export default function Header() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Close menu on route change
   useEffect(() => { setMenuOpen(false); setProfileOpen(false); }, [pathname]);
-
-  // Prevent body scroll when mobile menu open
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
@@ -46,6 +43,18 @@ export default function Header() {
 
   return (
     <>
+      {/* Responsive styles — no Tailwind dependency */}
+      <style>{`
+        .nav-desktop    { display: flex; }
+        .auth-desktop   { display: block; }
+        .hamburger-btn  { display: none; }
+        @media (max-width: 768px) {
+          .nav-desktop   { display: none !important; }
+          .auth-desktop  { display: none !important; }
+          .hamburger-btn { display: flex !important; }
+        }
+      `}</style>
+
       <header style={{
         background: 'var(--header-bg)',
         backdropFilter: 'blur(20px)',
@@ -54,20 +63,20 @@ export default function Header() {
         position: 'sticky', top: 0, zIndex: 40,
         height: '60px',
       }}>
-        <div style={{ maxWidth: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 clamp(0.875rem, 3vw, 1.5rem)', gap: '0.75rem' }}>
+        <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 clamp(0.875rem, 3vw, 1.5rem)', gap: '0.75rem' }}>
 
           {/* Logo */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', flexShrink: 0 }}>
             <div style={{ width: 34, height: 34, borderRadius: '10px', background: 'linear-gradient(135deg, var(--accent), var(--accent-hover))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <ChefHat size={18} color="var(--accent-btn-text)" strokeWidth={2.5} />
             </div>
-            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(0.95rem, 3vw, 1.1rem)', color: 'var(--text)', letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
+            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.1rem', color: 'var(--text)', letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
               Recipe<span style={{ color: 'var(--accent)' }}>AI</span>
             </span>
           </Link>
 
-          {/* Desktop Nav — hidden on mobile */}
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '0.15rem' }} className="hidden md:flex">
+          {/* Desktop Nav */}
+          <nav className="nav-desktop" style={{ alignItems: 'center', gap: '0.15rem' }}>
             {navLinks.map(({ href, label, icon: Icon }) => {
               const active = pathname === href;
               return (
@@ -78,7 +87,7 @@ export default function Header() {
                   fontSize: '0.875rem',
                   color: active ? 'var(--accent)' : 'var(--muted)',
                   background: active ? 'var(--accent-dim)' : 'transparent',
-                  transition: 'all 0.2s',
+                  transition: 'all 0.2s', whiteSpace: 'nowrap',
                 }}>
                   <Icon size={15} />{label}
                 </Link>
@@ -86,7 +95,7 @@ export default function Header() {
             })}
           </nav>
 
-          {/* Right side actions */}
+          {/* Right side */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
 
             {/* Theme toggle */}
@@ -95,12 +104,12 @@ export default function Header() {
               {isLight ? <Moon size={15} /> : <Sun size={15} />}
             </button>
 
-            {/* Auth — desktop */}
-            <div className="hidden sm:block">
+            {/* Auth — desktop only */}
+            <div className="auth-desktop">
               {user ? (
                 <div style={{ position: 'relative' }}>
                   <button onClick={() => setProfileOpen(!profileOpen)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'var(--accent-dim)', border: '1px solid var(--border-strong)', borderRadius: '8px', color: 'var(--accent)', cursor: 'pointer', fontFamily: 'DM Sans', fontSize: '0.85rem', fontWeight: 500 }}>
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'var(--accent-dim)', border: '1px solid var(--border-strong)', borderRadius: '8px', color: 'var(--accent)', cursor: 'pointer', fontFamily: 'DM Sans', fontSize: '0.85rem', fontWeight: 500, whiteSpace: 'nowrap' }}>
                     <User size={15} />
                     <span>{user.email?.split('@')[0]}</span>
                   </button>
@@ -122,30 +131,26 @@ export default function Header() {
                   )}
                 </div>
               ) : (
-                <Link href="/auth" className="btn-primary" style={{ padding: '7px 16px', fontSize: '0.85rem', textDecoration: 'none' }}>
+                <Link href="/auth" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '7px 16px', background: 'var(--accent)', color: 'var(--accent-btn-text)', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '0.85rem', border: 'none', borderRadius: '10px', cursor: 'pointer', textDecoration: 'none', whiteSpace: 'nowrap' }}>
                   Sign in
                 </Link>
               )}
             </div>
 
-            {/* Mobile hamburger */}
-            <button onClick={() => setMenuOpen(!menuOpen)}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34, background: menuOpen ? 'var(--accent-dim)' : 'transparent', border: `1px solid ${menuOpen ? 'var(--border-strong)' : 'transparent'}`, borderRadius: '8px', color: 'var(--muted)', cursor: 'pointer' }}
-              className="md:hidden">
+            {/* Hamburger — mobile only */}
+            <button className="hamburger-btn" onClick={() => setMenuOpen(!menuOpen)}
+              style={{ alignItems: 'center', justifyContent: 'center', width: 34, height: 34, background: menuOpen ? 'var(--accent-dim)' : 'transparent', border: `1px solid ${menuOpen ? 'var(--border-strong)' : 'transparent'}`, borderRadius: '8px', color: 'var(--muted)', cursor: 'pointer' }}>
               {menuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
       </header>
 
-      {/* Mobile full-screen drawer */}
+      {/* Mobile slide-in drawer */}
       {menuOpen && (
         <>
-          {/* Backdrop */}
           <div onClick={() => setMenuOpen(false)}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 50, backdropFilter: 'blur(4px)' }} />
-
-          {/* Drawer panel */}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 50, backdropFilter: 'blur(3px)', WebkitBackdropFilter: 'blur(3px)' }} />
           <div style={{
             position: 'fixed', top: 0, right: 0, bottom: 0,
             width: 'min(80vw, 300px)',
@@ -158,8 +163,8 @@ export default function Header() {
             animation: 'slideInRight 0.25s ease',
           }}>
             {/* Drawer header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-              <span style={{ fontFamily: 'Syne', fontWeight: 700, fontSize: '0.85rem', color: 'var(--muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Menu</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
+              <span style={{ fontFamily: 'Syne', fontWeight: 700, fontSize: '0.8rem', color: 'var(--muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Menu</span>
               <button onClick={() => setMenuOpen(false)}
                 style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', padding: '4px', display: 'flex' }}>
                 <X size={20} />
@@ -172,7 +177,7 @@ export default function Header() {
                 const active = pathname === href;
                 return (
                   <Link key={href} href={href} onClick={() => setMenuOpen(false)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '13px 16px', borderRadius: '12px', textDecoration: 'none', color: active ? 'var(--accent)' : 'var(--text)', fontWeight: active ? 600 : 400, fontSize: '1rem', background: active ? 'var(--accent-dim)' : 'transparent', border: `1px solid ${active ? 'var(--border-strong)' : 'transparent'}` }}>
+                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', borderRadius: '12px', textDecoration: 'none', color: active ? 'var(--accent)' : 'var(--text)', fontWeight: active ? 600 : 400, fontSize: '1rem', background: active ? 'var(--accent-dim)' : 'transparent', border: `1px solid ${active ? 'var(--border-strong)' : 'transparent'}` }}>
                     <Icon size={18} style={{ flexShrink: 0, color: active ? 'var(--accent)' : 'var(--muted)' }} />
                     {label}
                   </Link>
@@ -180,7 +185,7 @@ export default function Header() {
               })}
             </nav>
 
-            {/* Auth section in drawer */}
+            {/* Auth in drawer */}
             <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1rem', marginTop: '1rem' }}>
               {user ? (
                 <>
@@ -195,7 +200,7 @@ export default function Header() {
                 </>
               ) : (
                 <Link href="/auth" onClick={() => setMenuOpen(false)}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '13px', background: 'var(--accent)', color: 'var(--accent-btn-text)', borderRadius: '12px', textDecoration: 'none', fontFamily: 'Syne', fontWeight: 700, fontSize: '0.9rem' }}>
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '14px', background: 'var(--accent)', color: 'var(--accent-btn-text)', borderRadius: '12px', textDecoration: 'none', fontFamily: 'Syne', fontWeight: 700, fontSize: '0.95rem' }}>
                   <User size={16} /> Sign In
                 </Link>
               )}
@@ -204,7 +209,6 @@ export default function Header() {
         </>
       )}
 
-      {/* Close profile dropdown on outside click */}
       {profileOpen && <div style={{ position: 'fixed', inset: 0, zIndex: 55 }} onClick={() => setProfileOpen(false)} />}
 
       <style>{`

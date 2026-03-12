@@ -94,12 +94,12 @@ export default function HomePage() {
   const filterCount = selectedIngredients.length + (selectedCuisine ? 1 : 0) + (selectedLocation ? 1 : 0);
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', overflowX: 'hidden' }}>
       <Header />
-      <div style={{ display: 'flex', position: 'relative' }}>
+      <div style={{ display: 'flex', position: 'relative', overflowX: 'hidden' }}>
 
         {/* Desktop Sidebar */}
-        <div className="hidden md:block">
+        <div id="desktop-sidebar-wrap">
           {loading ? (
             <aside className="sidebar">
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -181,10 +181,12 @@ export default function HomePage() {
           </div>
 
           <style>{`
-            #mobile-filter-btn { display: none; }
+            #mobile-filter-btn  { display: none; }
+            #desktop-sidebar-wrap { display: block; }
             @media (max-width: 768px) {
-              #mobile-filter-btn { display: inline-flex !important; }
-              #predict-btn { width: 100%; justify-content: center; }
+              #mobile-filter-btn    { display: inline-flex !important; }
+              #predict-btn          { width: 100%; justify-content: center; }
+              #desktop-sidebar-wrap { display: none !important; }
             }
           `}</style>
 
