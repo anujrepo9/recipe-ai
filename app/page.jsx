@@ -38,6 +38,21 @@ export default function HomePage() {
 
   useEffect(() => {
     async function fetchData() {
+      // Cache static lists in sessionStorage — they don't change between visits.
+      // This alone eliminates 3 edge/serverless calls per page load.
+      const CACHE_KEY = 'recipeai-static-v1';
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      if (cached) {
+        try {
+          const { ingredients: ing, cuisines: cui, locations: loc } = JSON.parse(cached);
+          setIngredients(ing);
+          setCuisines(cui);
+          setLocations(loc);
+          setLoading(false);
+          return;
+        } catch { /* bad cache — fall through to fetch */ }
+      }
+
       try {
         const [ingRes, cuiRes, locRes] = await Promise.all([
           fetch(`${API_BASE}/api/ingredients`),
@@ -45,9 +60,13 @@ export default function HomePage() {
           fetch(`${API_BASE}/api/locations`),
         ]);
         const [ingData, cuiData, locData] = await Promise.all([ingRes.json(), cuiRes.json(), locRes.json()]);
-        setIngredients(ingData.ingredients || []);
-        setCuisines(cuiData.cuisines || []);
-        setLocations(locData.locations || []);
+        const ing = ingData.ingredients || [];
+        const cui = cuiData.cuisines || [];
+        const loc = locData.locations || [];
+        setIngredients(ing);
+        setCuisines(cui);
+        setLocations(loc);
+        try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ingredients: ing, cuisines: cui, locations: loc })); } catch { /* storage full — ignore */ }
       } catch (e) {
         setError('Could not connect to the API. Make sure the server is running.');
       } finally { setLoading(false); }

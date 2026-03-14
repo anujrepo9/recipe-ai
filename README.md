@@ -167,3 +167,7 @@ All tables have Row Level Security (RLS) enabled. Users can only access their ow
 - The `.pkl` model files in `model/` are required for the ML API — don't delete them
 - The `model/full_dataset.pkl` is also used for browse fallback if Supabase is unavailable
 - Make sure to **never** commit `.env.local` or your service role key to git
+
+## To run locally
+- First run python `local_server.py` file 
+- then `npm run dev`

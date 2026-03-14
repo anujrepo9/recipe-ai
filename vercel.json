@@ -1,9 +1,20 @@
 {
-  "rewrites": [
-    { "source": "/api/predict",     "destination": "/api/predict" },
-    { "source": "/api/ingredients", "destination": "/api/ingredients" },
-    { "source": "/api/cuisines",    "destination": "/api/cuisines" },
-    { "source": "/api/locations",   "destination": "/api/locations" },
-    { "source": "/api/recipes",     "destination": "/api/recipes" }
+  "headers": [
+    {
+      "source": "/api/ingredients",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600, stale-while-revalidate=86400" }]
+    },
+    {
+      "source": "/api/cuisines",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600, stale-while-revalidate=86400" }]
+    },
+    {
+      "source": "/api/locations",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600, stale-while-revalidate=86400" }]
+    },
+    {
+      "source": "/api/recipes",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=300, stale-while-revalidate=3600" }]
+    }
   ]
 }
