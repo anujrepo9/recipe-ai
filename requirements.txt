@@ -1,9 +1,8 @@
 flask==3.0.3
 flask-cors==4.0.1
-lightgbm==4.3.0
+lightgbm==4.5.0
 numpy==1.26.4
 pandas==2.2.2
 joblib==1.4.2
 scikit-learn==1.4.2
 supabase==2.4.6
-lightgbm==4.5.0
