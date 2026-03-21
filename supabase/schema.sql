@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS public.recipes (
   season           TEXT,
   ingredients      TEXT,
   instructions     TEXT,
+  youtube_url      TEXT,
   customer_rating  NUMERIC(3, 1) DEFAULT 0,
   preparation_time INTEGER DEFAULT 30,
   created_at       TIMESTAMPTZ DEFAULT NOW()
