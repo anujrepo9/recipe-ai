@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Star, Clock, ChevronDown, ChevronUp, Bookmark, BookmarkCheck } from 'lucide-react';
+import { Star, Clock, ChevronDown, ChevronUp, Bookmark, BookmarkCheck, Youtube } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 function Stars({ rating }) {
@@ -23,7 +23,8 @@ export default function RecipeCard({ recipe, index = 0, onSaveToggle, isSaved = 
 
   const { recipe_name, customer_rating = 0, preparation_time = 30,
     matched_ingredients = [], additional_ingredients = [],
-    instructions = '', predicted_popularity, cuisine_type, spice_level } = recipe;
+    instructions = '', predicted_popularity, cuisine_type, spice_level,
+    youtube_url = '' } = recipe;
 
   const matchPercent = recipe.total_ingredients
     ? Math.round((matched_ingredients.length / recipe.total_ingredients) * 100) : null;
@@ -125,14 +126,25 @@ export default function RecipeCard({ recipe, index = 0, onSaveToggle, isSaved = 
         </div>
       )}
 
-      {/* Instructions */}
+      {/* Instructions + YouTube */}
       {steps.length > 0 && (
         <>
-          <button onClick={() => setExpanded(!expanded)}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, padding: '4px 0', fontFamily: 'DM Sans, sans-serif' }}>
-            {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-            {expanded ? 'Hide instructions' : 'Show instructions'}
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
+            <button onClick={() => setExpanded(!expanded)}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, padding: '4px 0', fontFamily: 'DM Sans, sans-serif' }}>
+              {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              {expanded ? 'Hide instructions' : 'Show instructions'}
+            </button>
+            {youtube_url && (
+              <a href={youtube_url} target="_blank" rel="noopener noreferrer"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', fontWeight: 600, color: '#FF0000', textDecoration: 'none', padding: '3px 10px', borderRadius: '6px', border: '1px solid rgba(255,0,0,0.25)', background: 'rgba(255,0,0,0.06)', transition: 'background 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,0,0.12)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,0,0,0.06)'}>
+                <Youtube size={14} />
+                Watch
+              </a>
+            )}
+          </div>
           {expanded && (
             <ol style={{ margin: '1rem 0 0', paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {steps.map((step, i) => (

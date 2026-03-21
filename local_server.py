@@ -154,6 +154,7 @@ def predict():
                 "matched_ingredients":    matched,
                 "additional_ingredients": additional,
                 "total_ingredients":      len(row["recipe_ings"]),
+                "youtube_url":            row.get("youtube_url", ""),
             })
 
         return jsonify({"success": True, "recommendations": recommendations})

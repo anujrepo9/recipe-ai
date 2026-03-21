@@ -139,6 +139,7 @@ class handler(BaseHTTPRequestHandler):
                 "matched_ingredients":   matched,
                 "additional_ingredients": additional,
                 "total_ingredients":     len(row["recipe_ings"]),
+                "youtube_url":           row.get("youtube_url", ""),
             })
 
         return self._respond(200, {"success": True, "recommendations": recs})

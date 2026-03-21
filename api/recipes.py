@@ -12,7 +12,7 @@ try:
     
     COLS = ["recipe_name", "cuisine_type", "customer_rating", "preparation_time",
             "ingredients", "instructions", "spice_level", "dish_category",
-            "cooking_method", "price_range", "location"]
+            "cooking_method", "price_range", "location", "youtube_url"]
     
     available_cols = [c for c in COLS if c in df.columns]
     recipes = df[available_cols].fillna("").to_dict(orient="records")
