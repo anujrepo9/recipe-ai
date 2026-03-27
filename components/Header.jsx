@@ -209,7 +209,7 @@ export default function Header() {
         </>
       )}
 
-      {profileOpen && <div style={{ position: 'fixed', inset: 0, zIndex: 55 }} onClick={() => setProfileOpen(false)} />}
+      {profileOpen && <div style={{ position: 'fixed', inset: 0, zIndex: 39 }} onClick={() => setProfileOpen(false)} />}
 
       <style>{`
         @keyframes slideInRight {
