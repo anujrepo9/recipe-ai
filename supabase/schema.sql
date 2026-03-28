@@ -113,5 +113,61 @@ CREATE POLICY "History insertable by owner"
 CREATE POLICY "History deletable by owner"
   ON public.search_history FOR DELETE USING (auth.uid() = user_id);
 
+-- ── Collections ──────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.collections (
+  id         UUID    DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id    UUID    REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  name       TEXT    NOT NULL,
+  color      TEXT    DEFAULT '#E8620A',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (user_id, name)
+);
+
+CREATE INDEX IF NOT EXISTS idx_collections_user ON public.collections (user_id);
+
+-- ── Collection Recipes ───────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.collection_recipes (
+  id              UUID    DEFAULT gen_random_uuid() PRIMARY KEY,
+  collection_id   UUID    REFERENCES public.collections(id) ON DELETE CASCADE NOT NULL,
+  recipe_name     TEXT    NOT NULL,
+  added_at        TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (collection_id, recipe_name)
+);
+
+CREATE INDEX IF NOT EXISTS idx_collection_recipes_collection ON public.collection_recipes (collection_id);
+
+-- Collections: users can CRUD their own
+ALTER TABLE public.collections ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Collections viewable by owner"
+  ON public.collections FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Collections insertable by owner"
+  ON public.collections FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Collections updatable by owner"
+  ON public.collections FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Collections deletable by owner"
+  ON public.collections FOR DELETE USING (auth.uid() = user_id);
+
+-- Collection Recipes: accessible if collection owner
+ALTER TABLE public.collection_recipes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Collection recipes viewable by collection owner"
+  ON public.collection_recipes FOR SELECT USING (
+    collection_id IN (
+      SELECT id FROM public.collections WHERE user_id = auth.uid()
+    )
+  );
+CREATE POLICY "Collection recipes insertable by collection owner"
+  ON public.collection_recipes FOR INSERT WITH CHECK (
+    collection_id IN (
+      SELECT id FROM public.collections WHERE user_id = auth.uid()
+    )
+  );
+CREATE POLICY "Collection recipes deletable by collection owner"
+  ON public.collection_recipes FOR DELETE USING (
+    collection_id IN (
+      SELECT id FROM public.collections WHERE user_id = auth.uid()
+    )
+  );
+
 -- ── Done! ─────────────────────────────────────────────────────
 -- Next: run scripts/migrate_to_supabase.py to populate the recipes table.

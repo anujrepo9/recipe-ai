@@ -65,6 +65,37 @@ export default function RecipesPage() {
   const hasMore = paginated.length < filtered.length;
   const activeFilters = (cuisineFilter !== 'All' ? 1 : 0) + (spiceFilter !== 'All' ? 1 : 0);
 
+  // Inside RecipesPage, add this state + fetch:
+  const [trending, setTrending] = useState([]);
+  const [activeView, setActiveView] = useState('all'); // 'all' | 'trending'
+
+  useEffect(() => {
+    async function loadTrending() {
+      const { data } = await supabase
+        .from('saved_recipes')
+        .select('recipe_name, recipe_data')
+        .order('saved_at', { ascending: false })
+        .limit(200);
+
+      if (!data) return;
+
+      // Count saves per recipe client-side
+      const counts = {};
+      data.forEach(r => {
+        counts[r.recipe_name] = counts[r.recipe_name] || { count: 0, recipe_data: r.recipe_data };
+        counts[r.recipe_name].count++;
+      });
+
+      const sorted = Object.entries(counts)
+        .sort((a, b) => b[1].count - a[1].count)
+        .slice(0, 12)
+        .map(([name, { count, recipe_data }]) => ({ recipe_name: name, save_count: count, ...recipe_data }));
+
+      setTrending(sorted);
+    }
+    loadTrending();
+  }, []);  
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <Header />
@@ -77,46 +108,78 @@ export default function RecipesPage() {
             <span className="section-label" style={{ margin: 0 }}>Browse</span>
           </div>
           <h1 style={{ fontFamily: 'Playfair Display, serif', fontStyle: 'italic', fontSize: 'clamp(1.6rem, 4vw, 2.4rem)', fontWeight: 700, color: 'var(--text)', margin: '0 0 0.25rem' }}>
-            All Recipes
+            {activeView === 'trending' ? '🔥 Trending Recipes' : 'All Recipes'}
           </h1>
-          {!loading && <p style={{ color: 'var(--muted)', margin: 0, fontSize: '0.875rem' }}>{filtered.length} recipes found</p>}
+          {!loading && <p style={{ color: 'var(--muted)', margin: 0, fontSize: '0.875rem' }}>{activeView === 'trending' ? `${trending.length} trending recipes` : `${filtered.length} recipes found`}</p>}
         </div>
 
-        {/* Search bar — full width on mobile */}
-        <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
-          <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
-          <input className="input" style={{ paddingLeft: '36px', paddingRight: search ? '36px' : '12px' }}
-            placeholder="Search recipes or ingredients..." value={search}
-            onChange={e => { setSearch(e.target.value); setPage(0); }} />
-          {search && (
-            <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', padding: 2 }}>
-              <X size={14} />
-            </button>
-          )}
-        </div>
+        {/* Search bar — full width on mobile, hidden for trending */}
+        {activeView === 'all' && (
+          <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
+            <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+            <input className="input" style={{ paddingLeft: '36px', paddingRight: search ? '36px' : '12px' }}
+              placeholder="Search recipes or ingredients..." value={search}
+              onChange={e => { setSearch(e.target.value); setPage(0); }} />
+            {search && (
+              <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', padding: 2 }}>
+                <X size={14} />
+              </button>
+            )}
+          </div>
+        )}
 
-        {/* Filter toggle row */}
+        {/* View toggle */}
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-          <button className="btn-ghost" onClick={() => setShowFilters(!showFilters)}
-            style={{ fontSize: '0.85rem', padding: '7px 14px' }}>
-            Filters {activeFilters > 0 && <span style={{ background: 'var(--accent)', color: 'var(--accent-btn-text)', borderRadius: 999, padding: '1px 7px', fontSize: '0.7rem', fontWeight: 700 }}>{activeFilters}</span>}
-          </button>
-          <select className="input" style={{ width: 'auto', flex: '1', minWidth: 100, cursor: 'pointer', fontSize: '0.875rem', padding: '7px 12px' }}
-            value={sortBy} onChange={e => setSortBy(e.target.value)}>
-            <option value="rating">Top Rated</option>
-            <option value="time">Quickest</option>
-            <option value="name">A → Z</option>
-          </select>
-          {(search || activeFilters > 0) && (
-            <button className="btn-ghost" onClick={() => { setSearch(''); setCuisineFilter('All'); setSpiceFilter('All'); setPage(0); }}
-              style={{ fontSize: '0.85rem', padding: '7px 12px', color: 'var(--danger)', borderColor: 'rgba(220,38,38,0.2)' }}>
-              <X size={13} /> Clear
+          <div style={{ display: 'flex', gap: '4px', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '8px', padding: '4px' }}>
+            <button onClick={() => setActiveView('all')}
+              style={{
+                padding: '6px 12px', fontSize: '0.85rem', fontWeight: 500, transition: 'all 0.2s',
+                background: activeView === 'all' ? 'var(--accent)' : 'transparent',
+                color: activeView === 'all' ? 'var(--accent-btn-text)' : 'var(--text)',
+                border: 'none', borderRadius: '6px', cursor: 'pointer',
+              }}>
+              All
             </button>
+            <button onClick={() => setActiveView('trending')}
+              style={{
+                padding: '6px 12px', fontSize: '0.85rem', fontWeight: 500, transition: 'all 0.2s',
+                background: activeView === 'trending' ? 'var(--accent)' : 'transparent',
+                color: activeView === 'trending' ? 'var(--accent-btn-text)' : 'var(--text)',
+                border: 'none', borderRadius: '6px', cursor: 'pointer',
+              }}>
+              🔥 Trending
+            </button>
+          </div>
+          {activeView === 'all' && (
+            <>
+              <button className="btn-ghost" onClick={() => setShowFilters(!showFilters)}
+                style={{ fontSize: '0.85rem', padding: '7px 14px' }}>
+                Filters {activeFilters > 0 && <span style={{ background: 'var(--accent)', color: 'var(--accent-btn-text)', borderRadius: 999, padding: '1px 7px', fontSize: '0.7rem', fontWeight: 700 }}>{activeFilters}</span>}
+              </button>
+              <select className="input" style={{ width: 'auto', flex: '1', minWidth: 100, cursor: 'pointer', fontSize: '0.875rem', padding: '7px 12px' }}
+                value={sortBy} onChange={e => setSortBy(e.target.value)}>
+                <option value="rating">Top Rated</option>
+                <option value="time">Quickest</option>
+                <option value="name">A → Z</option>
+              </select>
+            </>
           )}
         </div>
+
+        {/* Filter row for 'all' view */}
+        {activeView === 'all' && (
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+            {(search || activeFilters > 0) && (
+              <button className="btn-ghost" onClick={() => { setSearch(''); setCuisineFilter('All'); setSpiceFilter('All'); setPage(0); }}
+                style={{ fontSize: '0.85rem', padding: '7px 12px', color: 'var(--danger)', borderColor: 'rgba(220,38,38,0.2)' }}>
+                <X size={13} /> Clear
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Expandable filter panel */}
-        {showFilters && (
+        {activeView === 'all' && showFilters && (
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1.25rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem' }}>
             <div style={{ flex: '1 1 140px' }}>
               <p className="section-label" style={{ marginBottom: '0.5rem' }}>Cuisine</p>
@@ -136,40 +199,61 @@ export default function RecipesPage() {
         )}
 
         {/* Grid */}
-        {loading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: '0.875rem' }}>
-            {[...Array(6)].map((_, i) => (
-              <div key={i} style={{ background: 'var(--card-bg)', borderRadius: '16px', padding: '1.25rem', border: '1px solid var(--border)' }}>
-                <div className="skeleton" style={{ height: 18, width: '70%', marginBottom: 10 }} />
-                <div className="skeleton" style={{ height: 14, width: '50%', marginBottom: 14 }} />
-                <div className="skeleton" style={{ height: 12, width: '90%' }} />
-              </div>
-            ))}
-          </div>
-        ) : paginated.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '3rem 1.5rem', color: 'var(--muted)' }}>
-            <BookOpen size={40} style={{ opacity: 0.2, margin: '0 auto 0.75rem', display: 'block' }} />
-            <p style={{ margin: 0 }}>No recipes match your filters.</p>
-          </div>
-        ) : (
-          <>
+        {activeView === 'trending' ? (
+          /* Trending View */
+          trending.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3rem 1.5rem', color: 'var(--muted)' }}>
+              <BookOpen size={40} style={{ opacity: 0.2, margin: '0 auto 0.75rem', display: 'block' }} />
+              <p style={{ margin: 0 }}>No trending recipes yet. Be the first to save a recipe!</p>
+            </div>
+          ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: '0.875rem' }}>
-              {paginated.map((recipe, i) => (
-                <RecipeCard key={recipe.id || recipe.recipe_name+i} recipe={recipe} index={i}
+              {trending.map((recipe, i) => (
+                <RecipeCard key={recipe.recipe_name+i} recipe={recipe} index={i}
                   isSaved={savedNames.has(recipe.recipe_name)}
                   onSaveToggle={(name, isSaved) => {
                     setSavedNames(prev => { const next = new Set(prev); isSaved ? next.add(name) : next.delete(name); return next; });
                   }} />
               ))}
             </div>
-            {hasMore && (
-              <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-                <button className="btn-ghost" onClick={() => setPage(p => p+1)} style={{ padding: '10px 32px', width: '100%', maxWidth: 300 }}>
-                  Load more ({filtered.length - paginated.length} remaining)
-                </button>
+          )
+        ) : (
+          /* All Recipes View */
+          loading ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: '0.875rem' }}>
+              {[...Array(6)].map((_, i) => (
+                <div key={i} style={{ background: 'var(--card-bg)', borderRadius: '16px', padding: '1.25rem', border: '1px solid var(--border)' }}>
+                  <div className="skeleton" style={{ height: 18, width: '70%', marginBottom: 10 }} />
+                  <div className="skeleton" style={{ height: 14, width: '50%', marginBottom: 14 }} />
+                  <div className="skeleton" style={{ height: 12, width: '90%' }} />
+                </div>
+              ))}
+            </div>
+          ) : paginated.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3rem 1.5rem', color: 'var(--muted)' }}>
+              <BookOpen size={40} style={{ opacity: 0.2, margin: '0 auto 0.75rem', display: 'block' }} />
+              <p style={{ margin: 0 }}>No recipes match your filters.</p>
+            </div>
+          ) : (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: '0.875rem' }}>
+                {paginated.map((recipe, i) => (
+                  <RecipeCard key={recipe.id || recipe.recipe_name+i} recipe={recipe} index={i}
+                    isSaved={savedNames.has(recipe.recipe_name)}
+                    onSaveToggle={(name, isSaved) => {
+                      setSavedNames(prev => { const next = new Set(prev); isSaved ? next.add(name) : next.delete(name); return next; });
+                    }} />
+                ))}
               </div>
-            )}
-          </>
+              {hasMore && (
+                <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+                  <button className="btn-ghost" onClick={() => setPage(p => p+1)} style={{ padding: '10px 32px', width: '100%', maxWidth: 300 }}>
+                    Load more ({filtered.length - paginated.length} remaining)
+                  </button>
+                </div>
+              )}
+            </>
+          )
         )}
       </main>
     </div>

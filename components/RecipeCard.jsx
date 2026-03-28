@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Star, Clock, ChevronDown, ChevronUp, Bookmark, BookmarkCheck, Youtube } from 'lucide-react';
+import { Star, Clock, ChevronDown, ChevronUp, Bookmark, BookmarkCheck, Youtube, FolderOpen } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 function Stars({ rating }) {
@@ -20,6 +20,10 @@ export default function RecipeCard({ recipe, index = 0, onSaveToggle, isSaved = 
   const [expanded, setExpanded] = useState(false);
   const [saving,   setSaving]   = useState(false);
   const [saved,    setSaved]    = useState(isSaved);
+  const [collections, setCollections] = useState([]);
+  const [collOpen, setCollOpen] = useState(false);
+  const [loadingCollections, setLoadingCollections] = useState(false);
+  const [addingToCollection, setAddingToCollection] = useState(null);
 
   const { recipe_name, customer_rating = 0, preparation_time = 30,
     matched_ingredients = [], additional_ingredients = [],
@@ -50,6 +54,44 @@ export default function RecipeCard({ recipe, index = 0, onSaveToggle, isSaved = 
   const steps = instructions
     ? instructions.split(/\d+\.\s+/).filter(Boolean).map(s => s.trim()) : [];
 
+  async function loadCollections() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    setLoadingCollections(true);
+    try {
+      const { data } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('name', { ascending: true });
+      setCollections(data || []);
+    } catch (e) {
+      console.error('Error loading collections:', e);
+    } finally {
+      setLoadingCollections(false);
+    }
+  }
+
+  async function addToCollection(collectionId) {
+    if (addingToCollection === collectionId) return;
+    setAddingToCollection(collectionId);
+    try {
+      const { error } = await supabase.from('collection_recipes').insert({
+        collection_id: collectionId,
+        recipe_name: recipe_name,
+      });
+      if (!error) {
+        setCollOpen(false);
+      } else if (error.code !== '23505') { // Ignore unique constraint errors (already in collection)
+        console.error('Error adding to collection:', error);
+      }
+    } catch (e) {
+      console.error('Error adding to collection:', e);
+    } finally {
+      setAddingToCollection(null);
+    }
+  }
+
   return (
     <div className="recipe-card" style={{ animationDelay: `${Math.min(index * 0.06, 0.36)}s` }}>
       {/* Top Row */}
@@ -58,6 +100,7 @@ export default function RecipeCard({ recipe, index = 0, onSaveToggle, isSaved = 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
             {cuisine_type && <span className="badge badge-teal">{cuisine_type}</span>}
             {spice_level  && <span className="badge badge-muted">{spice_level}</span>}
+            {recipe.save_count && <span className="badge badge-amber">🔥 {recipe.save_count} save{recipe.save_count !== 1 ? 's' : ''}</span>}
             {predicted_popularity !== undefined && (
               <span className="badge badge-amber">{Math.round(predicted_popularity)}% popular</span>
             )}
@@ -66,15 +109,113 @@ export default function RecipeCard({ recipe, index = 0, onSaveToggle, isSaved = 
             {index + 1}. {recipe_name}
           </h3>
         </div>
-        <button onClick={handleSave} disabled={saving} title={saved ? 'Remove from saved' : 'Save recipe'}
-          style={{
-            background: saved ? 'var(--accent-dim)' : 'transparent',
-            border: `1px solid ${saved ? 'var(--border-strong)' : 'var(--border)'}`,
-            borderRadius: '8px', padding: '8px', cursor: 'pointer',
-            color: saved ? 'var(--accent)' : 'var(--muted)', transition: 'all 0.2s', flexShrink: 0,
-          }}>
-          {saved ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
-        </button>
+        <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+          {/* Add to Collection Button */}
+          <div style={{ position: 'relative' }}>
+            <button 
+              onClick={() => {
+                if (!collOpen) loadCollections();
+                setCollOpen(!collOpen);
+              }} 
+              title="Add to collection"
+              style={{
+                background: 'transparent',
+                border: '1px solid var(--border)',
+                borderRadius: '8px', 
+                padding: '8px', 
+                cursor: 'pointer',
+                color: 'var(--muted)', 
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = 'var(--accent)';
+                e.currentTarget.style.color = 'var(--accent)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.color = 'var(--muted)';
+              }}
+            >
+              <FolderOpen size={18} />
+            </button>
+            {collOpen && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '6px',
+                background: 'var(--surface)',
+                border: '1px solid var(--border-strong)',
+                borderRadius: '10px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                zIndex: 1000,
+                minWidth: '200px',
+                maxHeight: '300px',
+                overflowY: 'auto'
+              }}>
+                {loadingCollections ? (
+                  <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--muted)', fontSize: '0.875rem' }}>
+                    Loading...
+                  </div>
+                ) : collections.length === 0 ? (
+                  <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--muted)', fontSize: '0.875rem' }}>
+                    No collections yet
+                  </div>
+                ) : (
+                  <div>
+                    {collections.map(col => (
+                      <button
+                        key={col.id}
+                        onClick={() => addToCollection(col.id)}
+                        disabled={addingToCollection === col.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          width: '100%',
+                          padding: '10px 12px',
+                          background: 'transparent',
+                          border: 'none',
+                          borderBottom: '1px solid var(--border)',
+                          cursor: 'pointer',
+                          color: 'var(--text)',
+                          fontSize: '0.875rem',
+                          transition: 'background 0.2s',
+                          opacity: addingToCollection === col.id ? 0.6 : 1,
+                        }}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.background = 'var(--surface2)';
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.background = 'transparent';
+                        }}
+                      >
+                        <div style={{
+                          width: 12,
+                          height: 12,
+                          borderRadius: '4px',
+                          background: col.color,
+                          flexShrink: 0
+                        }} />
+                        {col.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          {/* Bookmark Button */}
+          <button onClick={handleSave} disabled={saving} title={saved ? 'Remove from saved' : 'Save recipe'}
+            style={{
+              background: saved ? 'var(--accent-dim)' : 'transparent',
+              border: `1px solid ${saved ? 'var(--border-strong)' : 'var(--border)'}`,
+              borderRadius: '8px', padding: '8px', cursor: 'pointer',
+              color: saved ? 'var(--accent)' : 'var(--muted)', transition: 'all 0.2s', flexShrink: 0,
+            }}>
+            {saved ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
+          </button>
+        </div>
       </div>
 
       {/* Stats */}

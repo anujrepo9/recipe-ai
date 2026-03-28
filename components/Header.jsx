@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { ChefHat, Bookmark, BookOpen, Menu, X, LogOut, User, MessageSquare, Sun, Moon } from 'lucide-react';
+import { ChefHat, Bookmark, BookOpen, Menu, X, LogOut, User, MessageSquare, Sun, Moon, FolderOpen } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useTheme } from '../lib/ThemeProvider';
+
 
 export default function Header() {
   const [user,        setUser]        = useState(null);
@@ -39,6 +40,7 @@ export default function Header() {
     { href: '/recipes', label: 'All Recipes',   icon: BookOpen },
     { href: '/chat',    label: 'Chef AI',        icon: MessageSquare },
     { href: '/saved',   label: 'Saved',          icon: Bookmark },
+    { href: '/collections', label: 'Collections', icon: FolderOpen },
   ];
 
   return (
