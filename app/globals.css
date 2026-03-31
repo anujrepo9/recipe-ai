@@ -1,0 +1,437 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,600&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════
+   DARK THEME — Deep kitchen midnight
+═══════════════════════════════════════════════════════════ */
+:root,
+[data-theme="dark"] {
+  --bg:              #080B0F;
+  --surface:         #111518;
+  --surface2:        #1A1F24;
+  --surface3:        #222930;
+  --accent:          #00C8D4;
+  --accent-dim:      rgba(0,200,212,0.12);
+  --accent-glow:     rgba(0,200,212,0.35);
+  --accent-hover:    #00E5C3;
+  --accent-btn-text: #080B0F;
+  --amber:           #FFB347;
+  --danger:          #FF6B6B;
+  --text:            #F0F4F8;
+  --text-secondary:  #D0D8E4;
+  --muted:           #8B9AAB;
+  --border:          rgba(0,200,212,0.12);
+  --border-strong:   rgba(0,200,212,0.28);
+  --card-bg:         #111518;
+  --card-shadow:     0 8px 40px rgba(0,200,212,0.1);
+  --header-bg:       rgba(8,11,15,0.85);
+  --input-bg:        #1A1F24;
+  --scrollbar-thumb: #222930;
+  --tag-matched-bg:  rgba(0,200,212,0.15);
+  --tag-matched-clr: #00C8D4;
+  --tag-extra-bg:    rgba(139,154,171,0.08);
+  --tag-extra-clr:   #8B9AAB;
+  --ambient:         rgba(0,200,212,0.06);
+  --sidebar-bg:      #111518;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LIGHT THEME — Sun-drenched farmers market
+   Saffron + Burnt Orange + Cream — makes you want to COOK
+═══════════════════════════════════════════════════════════ */
+[data-theme="light"] {
+  --bg:              #FFF8EF;
+  --surface:         #FFFFFF;
+  --surface2:        #FFF3E5;
+  --surface3:        #FFE8CC;
+  --accent:          #E8620A;
+  --accent-dim:      rgba(232,98,10,0.1);
+  --accent-glow:     rgba(232,98,10,0.3);
+  --accent-hover:    #C94E00;
+  --accent-btn-text: #FFFFFF;
+  --amber:           #92400E;
+  --danger:          #DC2626;
+  --text:            #1C0A00;
+  --text-secondary:  #4A2800;
+  --muted:           #8C6A4A;
+  --border:          rgba(232,98,10,0.14);
+  --border-strong:   rgba(232,98,10,0.32);
+  --card-bg:         #FFFFFF;
+  --card-shadow:     0 8px 32px rgba(232,98,10,0.12);
+  --header-bg:       rgba(255,248,239,0.92);
+  --input-bg:        #FFF3E5;
+  --scrollbar-thumb: #FFD4A8;
+  --tag-matched-bg:  rgba(232,98,10,0.1);
+  --tag-matched-clr: #C94E00;
+  --tag-extra-bg:    rgba(140,106,74,0.08);
+  --tag-extra-clr:   #7A5230;
+  --ambient:         rgba(232,98,10,0.05);
+  --sidebar-bg:      #FFFFFF;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  margin: 0; padding: 0;
+  min-height: 100vh;
+}
+
+[data-theme="light"] body {
+  background-image:
+    radial-gradient(ellipse at 10% 0%,   rgba(255,179,71,0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 100%, rgba(232,98,10,0.08)  0%, transparent 50%);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: -200px; left: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, var(--ambient) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--surface2); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+
+/* ═══════════════════════════════════════════════════════════
+   SMOOTH THEME TRANSITIONS
+═══════════════════════════════════════════════════════════ */
+body, header, aside, main, div, span, p, h1, h2, h3, h4, button, input, textarea, select, a {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GLASS CARD
+═══════════════════════════════════════════════════════════ */
+.glass-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.glass-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--card-shadow);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHIP
+═══════════════════════════════════════════════════════════ */
+.chip {
+  display: inline-flex; align-items: center;
+  padding: 6px 14px; border-radius: 999px;
+  font-size: 0.82rem; font-weight: 500;
+  cursor: pointer; border: 1px solid var(--border);
+  background: transparent; color: var(--muted);
+  transition: all 0.2s ease; user-select: none; white-space: nowrap;
+}
+.chip:hover {
+  background: var(--accent-dim);
+  border-color: var(--border-strong);
+  color: var(--accent);
+}
+.chip.selected {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-btn-text);
+  font-weight: 600;
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════════════════ */
+.btn-primary {
+  display: inline-flex; align-items: center;
+  justify-content: center; gap: 8px;
+  padding: 12px 28px;
+  background: var(--accent); color: var(--accent-btn-text);
+  font-family: 'Syne', sans-serif; font-weight: 700;
+  font-size: 0.95rem; border: none; border-radius: 10px;
+  cursor: pointer; transition: all 0.2s ease; letter-spacing: 0.01em;
+}
+.btn-primary:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 0 24px var(--accent-glow);
+  transform: translateY(-1px);
+}
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-ghost {
+  display: inline-flex; align-items: center;
+  justify-content: center; gap: 6px;
+  padding: 8px 16px; background: transparent; color: var(--muted);
+  font-family: 'DM Sans', sans-serif; font-weight: 500;
+  font-size: 0.9rem; border: 1px solid var(--border);
+  border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+}
+.btn-ghost:hover {
+  border-color: var(--border-strong); color: var(--text);
+  background: var(--accent-dim);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INPUT
+═══════════════════════════════════════════════════════════ */
+.input {
+  width: 100%; background: var(--input-bg);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px 14px; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+  outline: none;
+}
+.input::placeholder { color: var(--muted); }
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+.input option { background: var(--surface2); color: var(--text); }
+
+/* ═══════════════════════════════════════════════════════════
+   RECIPE CARD
+═══════════════════════════════════════════════════════════ */
+.recipe-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px; padding: 1.5rem;
+  position: relative; overflow: hidden;
+  animation: fadeUp 0.4s ease forwards; opacity: 0;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.recipe-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0; transition: opacity 0.3s;
+}
+.recipe-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--card-shadow);
+  transform: translateY(-3px);
+}
+.recipe-card:hover::before { opacity: 1; }
+
+.recipe-card:nth-child(1) { animation-delay: 0.05s; }
+.recipe-card:nth-child(2) { animation-delay: 0.10s; }
+.recipe-card:nth-child(3) { animation-delay: 0.15s; }
+.recipe-card:nth-child(4) { animation-delay: 0.20s; }
+.recipe-card:nth-child(5) { animation-delay: 0.25s; }
+.recipe-card:nth-child(n+6) { animation-delay: 0.30s; }
+
+/* Light mode card — warm paper feel */
+[data-theme="light"] .recipe-card {
+  box-shadow: 0 2px 12px rgba(232,98,10,0.06);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SKELETON
+═══════════════════════════════════════════════════════════ */
+.skeleton {
+  background: linear-gradient(90deg, var(--surface2) 25%, var(--surface3) 50%, var(--surface2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+  border-radius: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BADGE
+═══════════════════════════════════════════════════════════ */
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em;
+}
+.badge-teal  { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--border-strong); }
+.badge-amber { background: rgba(255,179,71,0.12); color: var(--amber); border: 1px solid rgba(255,179,71,0.3); }
+.badge-muted { background: var(--accent-dim); color: var(--muted); border: 1px solid var(--border); }
+
+/* ═══════════════════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════════════════ */
+.sidebar {
+  width: 280px; min-width: 280px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  height: calc(100vh - 64px); overflow-y: auto;
+  position: sticky; top: 64px;
+  padding: 1.5rem 1.25rem;
+  scrollbar-width: thin;
+}
+[data-theme="light"] .sidebar {
+  box-shadow: 4px 0 20px rgba(232,98,10,0.05);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════════════ */
+.section-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 0.75rem;
+}
+.divider { height: 1px; background: var(--border); margin: 1.25rem 0; }
+
+.tag-matched {
+  background: var(--tag-matched-bg); color: var(--tag-matched-clr);
+  border: 1px solid var(--border-strong);
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 0.78rem; font-weight: 500;
+}
+.tag-extra {
+  background: var(--tag-extra-bg); color: var(--tag-extra-clr);
+  border: 1px solid var(--border);
+  padding: 3px 10px; border-radius: 999px; font-size: 0.78rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+  50%       { box-shadow: 0 0 20px 4px var(--accent-glow); }
+}
+
+.animate-spin-slow  { animation: spin 2s linear infinite; }
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .sidebar {
+    display: none; position: fixed; z-index: 50;
+    top: 0; left: 0; height: 100vh;
+    width: 85vw; max-width: 320px;
+    border-right: 1px solid var(--border-strong);
+  }
+  .sidebar.open { display: block; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE FIRST
+═══════════════════════════════════════════════════════════ */
+
+/* ── Tablet ──────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .sidebar { width: 240px; min-width: 240px; }
+}
+
+/* ── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* Sidebar hidden by default, shown as drawer */
+  .sidebar {
+    display: none;
+    position: fixed;
+    z-index: 50;
+    top: 0; left: 0;
+    height: 100vh;
+    width: 85vw;
+    max-width: 320px;
+    border-right: 1px solid var(--border-strong);
+    padding-top: 4rem;
+  }
+  .sidebar.open { display: block; }
+
+  /* Recipe card grid → single column */
+  .recipe-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Chip wrapping on mobile */
+  .chip { font-size: 0.78rem; padding: 5px 10px; }
+
+  /* Buttons full width on mobile */
+  .btn-primary-full { width: 100%; justify-content: center; }
+
+  /* Hero section padding */
+  .hero-section { padding: 1.5rem 1.25rem !important; }
+
+  /* Page padding */
+  .page-main { padding: 1.25rem 1rem !important; }
+
+  /* Recipe card padding */
+  .recipe-card { padding: 1.25rem 1rem; border-radius: 16px; }
+
+  /* Chat mode grid — 2 columns on mobile */
+  .mode-grid { grid-template-columns: 1fr 1fr !important; }
+
+  /* Filters row — stack vertically */
+  .filters-row { flex-direction: column !important; }
+  .filters-row > * { width: 100% !important; max-width: 100% !important; min-width: unset !important; }
+
+  /* Auth card full width */
+  .auth-card { border-radius: 0 !important; min-height: 100vh; border-left: none !important; border-right: none !important; }
+
+  /* Stat row in recipe card */
+  .stat-row { gap: 1rem !important; }
+
+  /* Suggestion chips — horizontal scroll */
+  .suggestion-chips { flex-wrap: nowrap !important; overflow-x: auto; padding-bottom: 4px; }
+  .suggestion-chips::-webkit-scrollbar { display: none; }
+  .suggestion-chips button { flex-shrink: 0; }
+}
+
+/* ── Small phones ────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .mode-grid { grid-template-columns: 1fr !important; }
+  .recipe-stats-row { flex-wrap: wrap; gap: 0.5rem !important; }
+  h1 { font-size: 1.5rem !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE TOUCH IMPROVEMENTS
+═══════════════════════════════════════════════════════════ */
+
+/* Larger tap targets on mobile */
+@media (max-width: 768px) {
+  .chip      { min-height: 36px; padding: 7px 13px; }
+  .btn-ghost { min-height: 40px; }
+  input, select, textarea { font-size: 16px !important; } /* prevents iOS zoom */
+}
+
+/* Sidebar height for 60px header */
+.sidebar { height: calc(100vh - 60px); top: 60px; }
+
+/* Horizontal scroll snap for chip rows */
+.chip-scroll {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 6px;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.chip-scroll::-webkit-scrollbar { display: none; }
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
