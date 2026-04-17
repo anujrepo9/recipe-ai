@@ -92,27 +92,34 @@ function AiRecipeCard({ recipe, aiData }) {
       onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.boxShadow = '0 4px 24px rgba(0,0,0,0.1)'; }}
       onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.boxShadow = 'none'; }}
     >
+      
       {/* Card header */}
-      <div style={{ padding: '1.25rem 1.25rem 1rem', borderBottom: '1px solid var(--border)', background: 'var(--accent-dim)' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '0.6rem' }}>
-          <h3 style={{ fontFamily: 'Playfair Display,serif', fontSize: '1.15rem', fontWeight: 700, color: 'var(--text)', margin: 0, lineHeight: 1.3 }}>
+      <div style={{ padding: '0.85rem 1rem 0.75rem', borderBottom: '1px solid var(--border)', background: 'var(--accent-dim)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.45rem' }}>
+          <h3 style={{ fontFamily: 'Playfair Display,serif', fontSize: '1rem', fontWeight: 700, color: 'var(--text)', margin: 0, lineHeight: 1.2 }}>
             {recipe.recipe_name}
           </h3>
           {recipe.predicted_rating && (
-            <span style={{ background: 'var(--accent)', color: 'var(--accent-btn-text)', padding: '3px 10px', borderRadius: 999, fontFamily: 'Syne', fontWeight: 700, fontSize: '0.78rem', flexShrink: 0 }}>
+            <span style={{ background: 'var(--accent)', color: 'var(--accent-btn-text)', padding: '2px 8px', borderRadius: 999, fontFamily: 'Syne', fontWeight: 700, fontSize: '0.72rem', flexShrink: 0 }}>
               ★ {Number(recipe.predicted_rating).toFixed(1)}
             </span>
           )}
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-          {recipe.cuisine_type && <span className="badge badge-amber">{recipe.cuisine_type}</span>}
+
+        {/* Matched ingredients row */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
+          {recipe.matched_ingredients?.map(ing => (
+            <span key={ing} style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '1px 8px', borderRadius: 999, fontSize: '0.68rem', fontFamily: 'DM Sans', fontWeight: 600, background: 'rgba(20,184,166,0.12)', color: '#2dd4bf', border: '1px solid rgba(20,184,166,0.25)' }}>
+              ✓ {ing}
+            </span>
+          ))}
           {recipe.location && <span className="badge badge-muted">{recipe.location}</span>}
+          {recipe.cuisine_type && <span className="badge badge-amber">{recipe.cuisine_type}</span>}
           {recipe.spice_level && (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 10px', borderRadius: 999, fontSize: '0.72rem', fontFamily: 'DM Sans', fontWeight: 600, background: `${spiceColor}18`, color: spiceColor, border: `1px solid ${spiceColor}30` }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '1px 8px', borderRadius: 999, fontSize: '0.68rem', fontFamily: 'DM Sans', fontWeight: 600, background: `${spiceColor}18`, color: spiceColor, border: `1px solid ${spiceColor}30` }}>
               🌶 {recipe.spice_level}
             </span>
           )}
-          {recipe.cooking_time && <span className="badge badge-muted">⏱ {recipe.cooking_time} min</span>}
         </div>
       </div>
 
@@ -127,9 +134,26 @@ function AiRecipeCard({ recipe, aiData }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--danger)', fontSize: '0.85rem' }}>
             <AlertCircle size={14} /> {aiData.error}
           </div>
+
         ) : aiData?.content ? (
-          <div>{renderMarkdown(aiData.content)}</div>
+          <div>
+            {renderMarkdown(aiData.content)}
+            {recipe.youtube_url && (
+              <a
+                href={recipe.youtube_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: '1rem', padding: '5px 14px', borderRadius: 999, fontSize: '0.78rem', fontFamily: 'DM Sans', fontWeight: 600, background: 'rgba(239,68,68,0.1)', color: '#f87171', border: '1px solid rgba(239,68,68,0.25)', textDecoration: 'none', transition: 'background 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.2)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.1)'}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
+                Watch on YouTube
+              </a>
+            )}
+          </div>
         ) : null}
+
       </div>
     </div>
   );
