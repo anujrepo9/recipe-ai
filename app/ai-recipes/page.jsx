@@ -99,11 +99,30 @@ function AiRecipeCard({ recipe, aiData }) {
           <h3 style={{ fontFamily: 'Playfair Display,serif', fontSize: '1rem', fontWeight: 700, color: 'var(--text)', margin: 0, lineHeight: 1.2 }}>
             {recipe.recipe_name}
           </h3>
-          {recipe.predicted_rating && (
-            <span style={{ background: 'var(--accent)', color: 'var(--accent-btn-text)', padding: '2px 8px', borderRadius: 999, fontFamily: 'Syne', fontWeight: 700, fontSize: '0.72rem', flexShrink: 0 }}>
-              ★ {Number(recipe.predicted_rating).toFixed(1)}
-            </span>
-          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+            {recipe.youtube_url && (
+              <a href={recipe.youtube_url} target="_blank" rel="noopener noreferrer"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '2px 10px', borderRadius: 999, fontSize: '0.7rem', fontFamily: 'DM Sans', fontWeight: 600, background: 'rgba(239,68,68,0.1)', color: '#f87171', border: '1px solid rgba(239,68,68,0.25)', textDecoration: 'none', transition: 'background 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.2)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.1)'}
+              >
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
+                Watch
+              </a>
+            )}
+            <a href={`https://www.swiggy.com/search?query=${encodeURIComponent(recipe.recipe_name)}`} target="_blank" rel="noopener noreferrer"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '2px 10px', borderRadius: 999, fontSize: '0.7rem', fontFamily: 'DM Sans', fontWeight: 600, background: 'rgba(252,128,25,0.1)', color: '#fb923c', border: '1px solid rgba(252,128,25,0.25)', textDecoration: 'none', transition: 'background 0.2s' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(252,128,25,0.2)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'rgba(252,128,25,0.1)'}
+            >
+              🛵 Order
+            </a>
+            {recipe.predicted_rating && (
+              <span style={{ background: 'var(--accent)', color: 'var(--accent-btn-text)', padding: '2px 8px', borderRadius: 999, fontFamily: 'Syne', fontWeight: 700, fontSize: '0.72rem' }}>
+                ★ {Number(recipe.predicted_rating).toFixed(1)}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Matched ingredients row */}
@@ -119,6 +138,7 @@ function AiRecipeCard({ recipe, aiData }) {
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '1px 8px', borderRadius: 999, fontSize: '0.68rem', fontFamily: 'DM Sans', fontWeight: 600, background: `${spiceColor}18`, color: spiceColor, border: `1px solid ${spiceColor}30` }}>
               🌶 {recipe.spice_level}
             </span>
+            
           )}
         </div>
       </div>
@@ -151,6 +171,17 @@ function AiRecipeCard({ recipe, aiData }) {
                 Watch on YouTube
               </a>
             )}
+            
+            <a
+              href={`https://www.swiggy.com/search?query=${encodeURIComponent(recipe.recipe_name)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: '1rem', marginLeft: '8px', padding: '5px 14px', borderRadius: 999, fontSize: '0.78rem', fontFamily: 'DM Sans', fontWeight: 600, background: 'rgba(252,128,25,0.1)', color: '#fb923c', border: '1px solid rgba(252,128,25,0.25)', textDecoration: 'none', transition: 'background 0.2s' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(252,128,25,0.2)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'rgba(252,128,25,0.1)'}
+            >
+              🛵 Order on Swiggy
+            </a>
           </div>
         ) : null}
 
