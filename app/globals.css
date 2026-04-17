@@ -265,7 +265,7 @@ body, header, aside, main, div, span, p, h1, h2, h3, h4, button, input, textarea
    SIDEBAR
 ═══════════════════════════════════════════════════════════ */
 .sidebar {
-  width: 280px; min-width: 280px;
+  width: 330px; min-width: 280px;
   background: var(--sidebar-bg);
   border-right: 1px solid var(--border);
   height: calc(100vh - 64px); overflow-y: auto;
