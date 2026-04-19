@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Sparkles, ChefHat, Loader2, AlertCircle, SlidersHorizontal, X, Wand2, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
+import { Sparkles, ChefHat, Loader2, AlertCircle, SlidersHorizontal, X, Wand2, ChevronDown, ChevronUp, RefreshCw, Printer, MapPin, Flame, Coins } from 'lucide-react';
 import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import { supabase } from '../../lib/supabase';
@@ -80,6 +80,115 @@ function AiSkeletonCard() {
 function AiRecipeCard({ recipe, aiData }) {
   const spiceColors = { mild: '#4ade80', medium: '#fbbf24', hot: '#f97316', 'very hot': '#ef4444' };
   const spiceColor = spiceColors[(recipe.spice_level || 'medium').toLowerCase()] || '#fbbf24';
+  const [nutrition, setNutrition] = useState(null);
+  const [nutritionLoading, setNutritionLoading] = useState(false);
+  const [nutritionError, setNutritionError] = useState(null);
+  const [showNutrition, setShowNutrition] = useState(false);
+
+  const fetchNutrition = async () => {
+    if (nutrition) { setShowNutrition(s => !s); return; }
+    setNutritionLoading(true); setNutritionError(null); setShowNutrition(true);
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'nutrition-price',
+          messages: [{ role: 'user', content: `Analyse ${recipe.recipe_name}` }],
+          context: {
+            recipeName: recipe.recipe_name,
+            ingredients: recipe.matched_ingredients,
+            cuisine: recipe.cuisine_type,
+            priceRange: recipe.price_range,
+            location: recipe.location,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      const text = data.content || '';
+      const clean = text.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(clean);
+      setNutrition(parsed);
+    } catch (e) {
+      setNutritionError('Could not estimate nutrition. Try again.');
+    } finally {
+      setNutritionLoading(false);
+    }
+  };
+
+  const openRestaurantFinder = () => {
+    const query = encodeURIComponent(recipe.cuisine_type?.replace(/_/g, ' ') + ' restaurant near me ' + recipe.recipe_name);
+    window.open('https://www.google.com/maps/search/' + query, '_blank');
+  };
+
+  const handlePrint = () => {
+    const raw = aiData?.content || '';
+    const name = recipe.recipe_name;
+    const date = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    // Parse markdown → HTML in React so the new window gets fully rendered content
+    const lines = raw.split('\n');
+    let bodyHtml = '';
+    let inList = false, listType = '';
+    const escape = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const fmt = s => escape(s).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    for (const line of lines) {
+      if (line.startsWith('# ')) {
+        if (inList) { bodyHtml += '</' + listType + '>'; inList = false; }
+        bodyHtml += '<h1 class="section-title">' + fmt(line.slice(2)) + '</h1>';
+      } else if (line.startsWith('## ')) {
+        if (inList) { bodyHtml += '</' + listType + '>'; inList = false; }
+        bodyHtml += '<h2>' + fmt(line.slice(3)) + '</h2>';
+      } else if (line.startsWith('### ')) {
+        if (inList) { bodyHtml += '</' + listType + '>'; inList = false; }
+        bodyHtml += '<h3>' + fmt(line.slice(4)) + '</h3>';
+      } else if (/^\d+\.\s/.test(line)) {
+        if (!inList || listType !== 'ol') { if (inList) bodyHtml += '</' + listType + '>'; bodyHtml += '<ol>'; inList = true; listType = 'ol'; }
+        bodyHtml += '<li>' + fmt(line.replace(/^\d+\.\s/, '')) + '</li>';
+      } else if (line.startsWith('- ') || line.startsWith('* ')) {
+        if (!inList || listType !== 'ul') { if (inList) bodyHtml += '</' + listType + '>'; bodyHtml += '<ul>'; inList = true; listType = 'ul'; }
+        bodyHtml += '<li>' + fmt(line.slice(2)) + '</li>';
+      } else if (line.trim() === '') {
+        if (inList) { bodyHtml += '</' + listType + '>'; inList = false; }
+      } else {
+        if (inList) { bodyHtml += '</' + listType + '>'; inList = false; }
+        bodyHtml += '<p>' + fmt(line) + '</p>';
+      }
+    }
+    if (inList) bodyHtml += '</' + listType + '>';
+
+    const fullHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"/><title>' + name + ' — RecipeAI</title>'
+      + '<link rel="preconnect" href="https://fonts.googleapis.com"/>'
+      + '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet"/>'
+      + '<style>'
+      + '* { box-sizing: border-box; margin: 0; padding: 0; }'
+      + 'body { font-family: DM Sans, sans-serif; color: #1a1a1a; background: #fff; padding: 40px 48px; max-width: 740px; margin: 0 auto; }'
+      + 'h1 { font-family: Playfair Display, serif; font-size: 2rem; font-weight: 700; margin-bottom: 6px; color: #111; }'
+      + '.section-title { font-family: Playfair Display, serif; font-size: 1.25rem; font-weight: 700; margin: 20px 0 6px; color: #222; }'
+      + '.meta { font-size: 0.8rem; color: #888; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid #eee; }'
+      + 'h2 { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #e07b39; margin: 22px 0 8px; }'
+      + 'h3 { font-size: 0.9rem; font-weight: 600; color: #333; margin: 12px 0 4px; }'
+      + 'p { font-size: 0.9rem; line-height: 1.8; color: #333; margin-bottom: 8px; }'
+      + 'ul, ol { padding-left: 20px; margin-bottom: 10px; }'
+      + 'li { font-size: 0.9rem; line-height: 1.8; color: #333; margin-bottom: 4px; }'
+      + 'strong { font-weight: 600; color: #111; }'
+      + '.footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #eee; font-size: 0.75rem; color: #bbb; text-align: center; }'
+      + '@media print { body { padding: 20px 28px; } }'
+      + '</style></head><body>'
+      + '<h1>' + name + '</h1>'
+      + '<div class="meta">Generated by RecipeAI &nbsp;&middot;&nbsp; ' + date + '</div>'
+      + bodyHtml
+      + '<div class="footer">RecipeAI — AI-powered recipe recommendations</div>'
+      + '</body></html>';
+
+    const win = window.open('', '_blank');
+    win.document.open();
+    win.document.write(fullHtml);
+    win.document.close();
+    win.onload = () => setTimeout(() => win.print(), 400);
+  }
 
   return (
     <div style={{
@@ -182,6 +291,86 @@ function AiRecipeCard({ recipe, aiData }) {
             >
               🛵 Order on Swiggy
             </a>
+            <button
+              onClick={handlePrint}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: '1rem', marginLeft: '8px', padding: '5px 14px', borderRadius: 999, fontSize: '0.78rem', fontFamily: 'DM Sans', fontWeight: 600, background: 'rgba(99,102,241,0.1)', color: '#818cf8', border: '1px solid rgba(99,102,241,0.25)', cursor: 'pointer', transition: 'background 0.2s' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.2)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'rgba(99,102,241,0.1)'}
+            >
+              <Printer size={13} />
+              Print / Save PDF
+            </button>
+
+            {/* Nutrition & Price button */}
+            <button
+              onClick={fetchNutrition}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: '1rem', marginLeft: '8px', padding: '5px 14px', borderRadius: 999, fontSize: '0.78rem', fontFamily: 'DM Sans', fontWeight: 600, background: 'rgba(20,184,166,0.1)', color: '#2dd4bf', border: '1px solid rgba(20,184,166,0.25)', cursor: 'pointer', transition: 'background 0.2s' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(20,184,166,0.2)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'rgba(20,184,166,0.1)'}
+            >
+              <Flame size={13} />
+              {showNutrition ? 'Hide' : 'Nutrition & Price'}
+            </button>
+
+            {/* Restaurant Finder button */}
+            <button
+              onClick={openRestaurantFinder}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: '1rem', marginLeft: '8px', padding: '5px 14px', borderRadius: 999, fontSize: '0.78rem', fontFamily: 'DM Sans', fontWeight: 600, background: 'rgba(52,211,153,0.1)', color: '#34d399', border: '1px solid rgba(52,211,153,0.25)', cursor: 'pointer', textDecoration: 'none', transition: 'background 0.2s' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(52,211,153,0.2)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'rgba(52,211,153,0.1)'}
+            >
+              <MapPin size={13} />
+              Find Restaurant
+            </button>
+
+            {/* Nutrition & Price Panel */}
+            {showNutrition && (
+              <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: 12, background: 'rgba(20,184,166,0.06)', border: '1px solid rgba(20,184,166,0.2)' }}>
+                {nutritionLoading ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#2dd4bf', fontSize: '0.82rem' }}>
+                    <Loader2 size={14} className="animate-spin-slow" /> Estimating nutrition & cost...
+                  </div>
+                ) : nutritionError ? (
+                  <div style={{ color: 'var(--danger)', fontSize: '0.82rem' }}>{nutritionError}</div>
+                ) : nutrition ? (
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: '0.75rem' }}>
+                      <Flame size={14} style={{ color: '#2dd4bf' }} />
+                      <span style={{ fontFamily: 'Syne', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2dd4bf' }}>Nutrition & Cost (per serving)</span>
+                    </div>
+                    {/* Calorie highlight */}
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: '0.75rem' }}>
+                      <span style={{ fontFamily: 'Playfair Display,serif', fontSize: '1.8rem', fontWeight: 700, color: 'var(--text)' }}>{nutrition.calories}</span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>kcal &nbsp;·&nbsp; {nutrition.servings} serving{nutrition.servings !== 1 ? 's' : ''}</span>
+                    </div>
+                    {/* Macros grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                      {[
+                        { label: 'Protein', value: nutrition.protein, unit: 'g', color: '#f472b6' },
+                        { label: 'Carbs',   value: nutrition.carbs,   unit: 'g', color: '#fbbf24' },
+                        { label: 'Fat',     value: nutrition.fat,     unit: 'g', color: '#fb923c' },
+                        { label: 'Fiber',   value: nutrition.fiber,   unit: 'g', color: '#4ade80' },
+                      ].map(m => (
+                        <div key={m.label} style={{ background: 'var(--card-bg)', borderRadius: 8, padding: '0.5rem', textAlign: 'center', border: '1px solid var(--border)' }}>
+                          <div style={{ fontSize: '1rem', fontWeight: 700, color: m.color }}>{m.value}<span style={{ fontSize: '0.65rem' }}>{m.unit}</span></div>
+                          <div style={{ fontSize: '0.65rem', color: 'var(--muted)', fontFamily: 'Syne', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{m.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Price */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0.6rem 0.75rem', borderRadius: 8, background: 'rgba(251,146,60,0.08)', border: '1px solid rgba(251,146,60,0.2)' }}>
+                      <Coins size={14} style={{ color: '#fb923c', flexShrink: 0 }} />
+                      <div>
+                        <span style={{ fontSize: '1rem', fontWeight: 700, color: '#fb923c' }}>₹{nutrition.price_inr}</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--muted)', marginLeft: 6 }}>estimated home cook cost</span>
+                        {nutrition.price_note && <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: 2 }}>{nutrition.price_note}</div>}
+                      </div>
+                    </div>
+                    <p style={{ fontSize: '0.65rem', color: 'var(--muted)', marginTop: '0.5rem', fontStyle: 'italic' }}>* AI estimates — values are approximate</p>
+                  </div>
+                ) : null}
+              </div>
+            )}
           </div>
         ) : null}
 
