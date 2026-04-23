@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Star, Clock, ChevronDown, ChevronUp, Bookmark, BookmarkCheck, Youtube } from 'lucide-react';
+import { Star, Clock, ChevronDown, ChevronUp, Bookmark, BookmarkCheck, Youtube, ShoppingBag, MapPin } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 function Stars({ rating }) {
@@ -13,6 +13,52 @@ function Stars({ rating }) {
           style={{ opacity: i <= full ? 1 : 0.3 }} />
       ))}
     </span>
+  );
+}
+
+function getSwiggyUrl(recipeName) {
+  return `https://www.swiggy.com/search?query=${encodeURIComponent(recipeName)}`;
+}
+
+function getRestaurantUrl(recipeName, cuisineType) {
+  const query = encodeURIComponent(`${recipeName} ${cuisineType || ''} restaurant near me`);
+  return `https://www.google.com/maps/search/${query}`;
+}
+
+function getYoutubeUrl(recipeName, existingUrl) {
+  if (existingUrl) return existingUrl;
+  return `https://www.youtube.com/results?search_query=${encodeURIComponent(recipeName + ' recipe')}`;
+}
+
+function LinkBtn({ href, color, bg, borderColor, hoverBg, icon, label }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '5px',
+        fontSize: '0.78rem',
+        fontWeight: 600,
+        color,
+        textDecoration: 'none',
+        padding: '4px 10px',
+        borderRadius: '6px',
+        border: `1px solid ${borderColor}`,
+        background: hovered ? hoverBg : bg,
+        transition: 'background 0.2s',
+        whiteSpace: 'nowrap',
+        fontFamily: 'DM Sans, sans-serif',
+      }}
+    >
+      {icon}
+      {label}
+    </a>
   );
 }
 
@@ -126,24 +172,53 @@ export default function RecipeCard({ recipe, index = 0, onSaveToggle, isSaved = 
         </div>
       )}
 
-      {/* Instructions + YouTube */}
+      {/* ── Action Links Row ─────────────────────────────────────────────── */}
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '6px',
+        marginTop: '0.75rem',
+        paddingTop: '0.75rem',
+        borderTop: '1px solid var(--border)',
+      }}>
+        <LinkBtn
+          href={getYoutubeUrl(recipe_name, youtube_url)}
+          color="#FF0000"
+          bg="rgba(255,0,0,0.06)"
+          borderColor="rgba(255,0,0,0.25)"
+          hoverBg="rgba(255,0,0,0.12)"
+          icon={<Youtube size={13} />}
+          label="YouTube"
+        />
+        <LinkBtn
+          href={getSwiggyUrl(recipe_name)}
+          color="#FC8019"
+          bg="rgba(252,128,25,0.06)"
+          borderColor="rgba(252,128,25,0.25)"
+          hoverBg="rgba(252,128,25,0.13)"
+          icon={<ShoppingBag size={13} />}
+          label="Order on Swiggy"
+        />
+        <LinkBtn
+          href={getRestaurantUrl(recipe_name, cuisine_type)}
+          color="#4285F4"
+          bg="rgba(66,133,244,0.06)"
+          borderColor="rgba(66,133,244,0.25)"
+          hoverBg="rgba(66,133,244,0.12)"
+          icon={<MapPin size={13} />}
+          label="Nearby Restaurants"
+        />
+      </div>
+
+      {/* Instructions */}
       {steps.length > 0 && (
         <>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', marginTop: '0.75rem' }}>
             <button onClick={() => setExpanded(!expanded)}
               style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, padding: '4px 0', fontFamily: 'DM Sans, sans-serif' }}>
               {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               {expanded ? 'Hide instructions' : 'Show instructions'}
             </button>
-            {youtube_url && (
-              <a href={youtube_url} target="_blank" rel="noopener noreferrer"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', fontWeight: 600, color: '#FF0000', textDecoration: 'none', padding: '3px 10px', borderRadius: '6px', border: '1px solid rgba(255,0,0,0.25)', background: 'rgba(255,0,0,0.06)', transition: 'background 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,0,0,0.12)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,0,0,0.06)'}>
-                <Youtube size={14} />
-                Watch
-              </a>
-            )}
           </div>
           {expanded && (
             <ol style={{ margin: '1rem 0 0', paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
