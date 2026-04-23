@@ -5,7 +5,7 @@ Local development server that mirrors all Vercel API endpoints.
 Use this when running the project locally with `npm run dev`.
 
 Usage:
-    pip install flask flask-cors numpy pandas joblib scikit-learn
+    pip install flask flask-cors numpy pandas joblib scikit-learn lightgbm
     python local_server.py
 
 Runs on: http://127.0.0.1:5000
